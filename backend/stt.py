@@ -17,7 +17,7 @@ def get_model(model_size: str = "base") -> WhisperModel:
     return _model
 
 
-def transcribe_audio(audio_bytes: bytes, model_size: str = "base") -> str:
+def transcribe_audio(audio_bytes: bytes, model_size: str = "base", language: str = "hu") -> str:
     """Transcribe raw audio bytes (WAV format) to text."""
     model = get_model(model_size)
 
@@ -31,6 +31,6 @@ def transcribe_audio(audio_bytes: bytes, model_size: str = "base") -> str:
         import resampy
         audio_data = resampy.resample(audio_data, sample_rate, 16000)
 
-    segments, _ = model.transcribe(audio_data, beam_size=5, language="en")
+    segments, _ = model.transcribe(audio_data, beam_size=5, language=language)
     text = " ".join(segment.text for segment in segments).strip()
     return text

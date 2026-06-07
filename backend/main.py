@@ -22,6 +22,7 @@ ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 ELEVENLABS_API_KEY = os.environ["ELEVENLABS_API_KEY"]
 ELEVENLABS_VOICE_ID = os.environ["ELEVENLABS_VOICE_ID"]
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "base")
+WHISPER_LANGUAGE = os.getenv("WHISPER_LANGUAGE", "hu")
 
 import anthropic as _anthropic
 _llm_client = _anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -153,7 +154,7 @@ async def speak(file: UploadFile = File(...)):
         raise HTTPException(400, "No active session — GM must start a session first")
 
     audio_bytes = await file.read()
-    player_text = transcribe_audio(audio_bytes, WHISPER_MODEL)
+    player_text = transcribe_audio(audio_bytes, WHISPER_MODEL, WHISPER_LANGUAGE)
 
     if not player_text:
         raise HTTPException(422, "Could not transcribe audio")
