@@ -22,6 +22,7 @@ class Spirit:
     name: str
     system_prompt: str
     milestones: list[Milestone]
+    listen_seconds: int = 10
 
 
 @dataclass
@@ -39,6 +40,8 @@ class SessionState:
     session_active: bool = False
     gm_context: str = ""          # Extra context injected by GM
     conversation_history: list = field(default_factory=list)
+    greeting: Optional[str] = None
+    greeting_audio_b64: Optional[str] = None
 
     def current_milestone_obj(self) -> Optional[Milestone]:
         if self.spirit is None:
@@ -94,6 +97,7 @@ class GameConfig:
                 name=sdata["name"],
                 system_prompt=sdata["system_prompt"],
                 milestones=milestones,
+                listen_seconds=sdata.get("listen_seconds", 10),
             )
 
     def get_player(self, player_id: str) -> Optional[Player]:
@@ -113,6 +117,7 @@ class GameConfig:
             spirits_dict[sid] = {
                 "name": s.name,
                 "system_prompt": s.system_prompt,
+                "listen_seconds": s.listen_seconds,
                 "milestones": [
                     {
                         "id": m.id,

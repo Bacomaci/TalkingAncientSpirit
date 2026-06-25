@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spirit Bot — Game Setup</title>
+  <title>Szellem Bot — Játék beállítása</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -99,7 +99,6 @@
       text-align: center; padding: 20px 0;
     }
 
-    /* Milestone list inside spirit editor */
     .milestone-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
     .milestone-item {
       background: #1a1007;
@@ -130,7 +129,6 @@
     #toast.error { background: #3a1a1a; border-color: #6a3a3a; color: #ba5c5c; }
     #toast.show { opacity: 1; }
 
-    /* Modal overlay */
     .modal-bg {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.7); z-index: 100;
@@ -154,93 +152,93 @@
 <body>
 
 <nav>
-  <span>&#9760; Spirit Bot</span>
-  <a href="index.html" class="nav-link">&#9654; Run Session</a>
-  <a href="setup.html" class="nav-link active">&#9881; Game Setup</a>
+  <span>&#9760; Szellem Bot</span>
+  <a href="index.html" class="nav-link">&#9654; Játék</a>
+  <a href="setup.html" class="nav-link active">&#9881; Beállítások</a>
 </nav>
 
 <div class="layout">
 
-  <!-- ── LEFT: Spirits ───────────────────────────────────────────────────── -->
+  <!-- ── BAL: Szellemek ─────────────────────────────────────────────────── -->
   <div>
     <div class="panel">
-      <h2>Spirits</h2>
+      <h2>Szellemek</h2>
       <p style="font-size:0.82rem;color:#6a5a44;margin-bottom:14px">
-        Each player has one spirit — their ancestor. Define the spirit's personality and the secrets it reveals at each milestone.
+        Minden játékosnak egy szelleme van — az őse. Határozd meg a szellem személyiségét és az egyes mérföldköveken feltárandó titkokat.
       </p>
       <div class="card-list" id="spiritList">
-        <div class="empty-state">No spirits yet.</div>
+        <div class="empty-state">Még nincs szellem.</div>
       </div>
-      <button class="btn btn-primary" onclick="openSpiritModal(null)">+ Add Spirit</button>
+      <button class="btn btn-primary" onclick="openSpiritModal(null)">+ Szellem hozzáadása</button>
     </div>
   </div>
 
-  <!-- ── RIGHT: Players ──────────────────────────────────────────────────── -->
+  <!-- ── JOBB: Játékosok ────────────────────────────────────────────────── -->
   <div>
     <div class="panel">
-      <h2>Players</h2>
+      <h2>Játékosok</h2>
       <p style="font-size:0.82rem;color:#6a5a44;margin-bottom:14px">
-        Each player is assigned one spirit. The GM selects the player when they approach the altar.
+        Minden játékoshoz egy szellem tartozik. A játékmester választja ki a játékost, amikor az oltárhoz lép.
       </p>
       <div class="card-list" id="playerList">
-        <div class="empty-state">No players yet.</div>
+        <div class="empty-state">Még nincs játékos.</div>
       </div>
-      <button class="btn btn-primary" id="btnAddPlayer" onclick="openPlayerModal()">+ Add Player</button>
+      <button class="btn btn-primary" id="btnAddPlayer" onclick="openPlayerModal()">+ Játékos hozzáadása</button>
     </div>
   </div>
 
 </div>
 
-<!-- ── Spirit Modal ─────────────────────────────────────────────────────────── -->
+<!-- ── Szellem modal ──────────────────────────────────────────────────────── -->
 <div class="modal-bg" id="spiritModal">
   <div class="modal">
-    <h2 id="spiritModalTitle">Add Spirit</h2>
+    <h2 id="spiritModalTitle">Szellem hozzáadása</h2>
 
-    <label>Spirit name <small style="color:#6a5a44">(e.g. "Alaric the Steadfast")</small></label>
+    <label>Szellem neve <small style="color:#6a5a44">(pl. „Alaric az Állhatatos")</small></label>
     <input type="text" id="sName" placeholder="Alaric" />
 
-    <label>Personality & background <small style="color:#6a5a44">— the spirit will stay in this character</small></label>
+    <label>Személyiség és háttér <small style="color:#6a5a44">— a szellem ebben a karakterben marad</small></label>
     <textarea id="sPrompt" style="min-height:120px"
-      placeholder="You are Alaric, an ancient ancestor who died defending the family estate. You speak with gravitas and occasional dark humour. You address your descendant by name. Keep responses under 5 sentences unless revealing a secret."></textarea>
+      placeholder="Te Alaric vagy, egy ős szelleme, aki a családi birtok védelmében halt meg. Súllyal és alkalmi sötét humorral beszélsz. Nevén szólítod leszármazottadat. Válaszaid ne legyenek hosszabbak 5 mondatnál, kivéve ha titkot társz fel."></textarea>
 
     <hr class="divider" />
-    <h3>Milestones &amp; Secrets</h3>
+    <h3>Mérföldkövek &amp; Titkok</h3>
     <p style="font-size:0.79rem;color:#6a5a44;margin-bottom:12px">
-      Milestones are story moments. The GM advances to each one during the session.
-      A secret is revealed to the player at that moment. The first milestone is always the opening greeting.
+      A mérföldkövek fontos történeti pillanatok. A játékmester lép tovább mindegyikre a játék során.
+      Az adott pillanatban a szellem feltárja a hozzá tartozó titkot. Az első mérföldkő mindig a nyitó köszöntő.
     </p>
 
     <div class="milestone-list" id="milestoneList"></div>
-    <button class="btn btn-ghost btn-sm" onclick="addMilestone()">+ Add Milestone</button>
+    <button class="btn btn-ghost btn-sm" onclick="addMilestone()">+ Mérföldkő hozzáadása</button>
 
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeSpiritModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveSpirit()">Save Spirit</button>
+      <button class="btn btn-ghost" onclick="closeSpiritModal()">Mégse</button>
+      <button class="btn btn-primary" onclick="saveSpirit()">Szellem mentése</button>
     </div>
   </div>
 </div>
 
-<!-- ── Player Modal ─────────────────────────────────────────────────────────── -->
+<!-- ── Játékos modal ──────────────────────────────────────────────────────── -->
 <div class="modal-bg" id="playerModal">
   <div class="modal" style="width:380px">
-    <h2>Add Player</h2>
-    <label>Player name</label>
+    <h2>Játékos hozzáadása</h2>
+    <label>Játékos neve</label>
     <input type="text" id="pName" placeholder="Erindel" />
-    <label>Assigned spirit</label>
+    <label>Hozzárendelt szellem</label>
     <select id="pSpirit"></select>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closePlayerModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="savePlayer()">Add Player</button>
+      <button class="btn btn-ghost" onclick="closePlayerModal()">Mégse</button>
+      <button class="btn btn-primary" onclick="savePlayer()">Játékos hozzáadása</button>
     </div>
   </div>
 </div>
 
-<!-- ── Toast ────────────────────────────────────────────────────────────────── -->
+<!-- ── Toast ─────────────────────────────────────────────────────────────── -->
 <div id="toast"></div>
 
 <script>
-  let spirits = {};   // id → {name, system_prompt, milestones:[]}
-  let players = [];   // [{id, name, spirit}]
+  let spirits = {};
+  let players = [];
   let editingSpiritId = null;
 
   // ── Boot ─────────────────────────────────────────────────────────────────
@@ -260,7 +258,7 @@
     const list = document.getElementById('spiritList');
     const ids = Object.keys(spirits);
     if (!ids.length) {
-      list.innerHTML = '<div class="empty-state">No spirits yet.</div>';
+      list.innerHTML = '<div class="empty-state">Még nincs szellem.</div>';
       return;
     }
     list.innerHTML = ids.map(id => {
@@ -270,11 +268,11 @@
         <div class="card">
           <div style="flex:1">
             <div class="card-name">${esc(s.name)}</div>
-            <div class="card-sub">${mCount} milestone${mCount !== 1 ? 's' : ''}</div>
+            <div class="card-sub">${mCount} mérföldkő</div>
           </div>
           <div class="card-actions">
-            <button class="btn btn-secondary btn-sm" onclick="openSpiritModal('${id}')">Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteSpirit('${id}')">Delete</button>
+            <button class="btn btn-secondary btn-sm" onclick="openSpiritModal('${id}')">Szerkesztés</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteSpirit('${id}')">Törlés</button>
           </div>
         </div>`;
     }).join('');
@@ -283,20 +281,20 @@
   function renderPlayers() {
     const list = document.getElementById('playerList');
     if (!players.length) {
-      list.innerHTML = '<div class="empty-state">No players yet.</div>';
+      list.innerHTML = '<div class="empty-state">Még nincs játékos.</div>';
       return;
     }
     list.innerHTML = players.map(p => {
       const s = spirits[p.spirit];
-      const spiritName = s ? s.name : `(unknown: ${p.spirit})`;
+      const spiritName = s ? s.name : `(ismeretlen: ${p.spirit})`;
       return `
         <div class="card">
           <div style="flex:1">
             <div class="card-name">${esc(p.name)}</div>
-            <div class="card-sub">Spirit: ${esc(spiritName)}</div>
+            <div class="card-sub">Szellem: ${esc(spiritName)}</div>
           </div>
           <div class="card-actions">
-            <button class="btn btn-danger btn-sm" onclick="deletePlayer('${p.id}')">Remove</button>
+            <button class="btn btn-danger btn-sm" onclick="deletePlayer('${p.id}')">Eltávolítás</button>
           </div>
         </div>`;
     }).join('');
@@ -306,7 +304,7 @@
 
   function openSpiritModal(spiritId) {
     editingSpiritId = spiritId;
-    document.getElementById('spiritModalTitle').textContent = spiritId ? 'Edit Spirit' : 'Add Spirit';
+    document.getElementById('spiritModalTitle').textContent = spiritId ? 'Szellem szerkesztése' : 'Szellem hozzáadása';
 
     if (spiritId && spirits[spiritId]) {
       const s = spirits[spiritId];
@@ -316,7 +314,7 @@
     } else {
       document.getElementById('sName').value = '';
       document.getElementById('sPrompt').value = '';
-      renderMilestones([{name: 'Opening greeting', greeting: '', secret: '', secret_intro: ''}]);
+      renderMilestones([{name: 'Nyitó köszöntő', greeting: '', secret: '', secret_intro: ''}]);
     }
     document.getElementById('spiritModal').classList.add('open');
   }
@@ -336,9 +334,9 @@
     return `
       <div class="milestone-item" id="ms_${i}">
         <div class="milestone-header">
-          <span class="milestone-num">${i === 0 ? 'OPENING' : `MILESTONE ${i}`}</span>
+          <span class="milestone-num">${i === 0 ? 'NYITÓ' : `${i}. MÉRFÖLDKŐ`}</span>
           <input type="text" class="milestone-title" value="${esc(m.name || '')}"
-            placeholder="${isFirst ? 'Opening greeting' : `Milestone ${i} name`}"
+            placeholder="${isFirst ? 'Nyitó köszöntő' : `${i}. mérföldkő neve`}"
             style="background:transparent;border:none;outline:none;color:#e8d9c0;font-size:0.88rem;font-weight:600;padding:0;width:100%"
             oninput="this.style.borderBottom='1px solid #c9a84c'" />
           <button class="btn btn-ghost btn-sm" onclick="toggleMilestone(${i})">&#9660;</button>
@@ -346,13 +344,13 @@
         </div>
         <div class="milestone-body" id="msb_${i}">
           ${isFirst ? `
-            <label>Opening words <small style="color:#6a5a44">— what the spirit says when summoned</small></label>
-            <textarea class="ms-greeting" placeholder="Ah, you have found the altar at last, child...">${esc(m.greeting || '')}</textarea>
+            <label>Nyitó szavak <small style="color:#6a5a44">— mit mond a szellem megidézéskor</small></label>
+            <textarea class="ms-greeting" placeholder="Ah, végre megtaláltad az oltárt, gyermekem...">${esc(m.greeting || '')}</textarea>
           ` : `
-            <label>Secret to reveal <small style="color:#6a5a44">— the information the spirit discloses at this milestone</small></label>
-            <textarea class="ms-secret" placeholder="The traitor carries a hidden brand on his left wrist...">${esc(m.secret || '')}</textarea>
-            <label>How to introduce it <small style="color:#6a5a44">— optional tone / lead-in for the revelation</small></label>
-            <textarea class="ms-intro" placeholder="You have earned this truth. Listen carefully...">${esc(m.secret_intro || '')}</textarea>
+            <label>Feltárandó titok <small style="color:#6a5a44">— az információ, amelyet a szellem ezen a mérföldkövön felfed</small></label>
+            <textarea class="ms-secret" placeholder="Az áruló egy rejtett bélyeget visel a bal csuklóján...">${esc(m.secret || '')}</textarea>
+            <label>Hogyan vezesse be <small style="color:#6a5a44">— opcionális hangnem / felvezetés a feltáráshoz</small></label>
+            <textarea class="ms-intro" placeholder="Megérdemelted ezt az igazságot. Figyelj rám...">${esc(m.secret_intro || '')}</textarea>
           `}
         </div>
       </div>`;
@@ -373,11 +371,10 @@
 
   function removeMilestone(i) {
     document.getElementById(`ms_${i}`).remove();
-    // Re-index remaining
     const items = document.querySelectorAll('.milestone-item');
     items.forEach((el, idx) => {
       el.id = `ms_${idx}`;
-      el.querySelector('.milestone-num').textContent = idx === 0 ? 'OPENING' : `MILESTONE ${idx}`;
+      el.querySelector('.milestone-num').textContent = idx === 0 ? 'NYITÓ' : `${idx}. MÉRFÖLDKŐ`;
       const body = el.querySelector('.milestone-body');
       if (body) body.id = `msb_${idx}`;
       const toggle = el.querySelector('.btn-ghost');
@@ -406,11 +403,11 @@
   async function saveSpirit() {
     const name = document.getElementById('sName').value.trim();
     const system_prompt = document.getElementById('sPrompt').value.trim();
-    if (!name) { toast('Spirit needs a name.', true); return; }
-    if (!system_prompt) { toast('Please fill in the personality / background.', true); return; }
+    if (!name) { toast('A szellemnek kell egy név.', true); return; }
+    if (!system_prompt) { toast('Kérjük, töltsd ki a személyiség / háttér mezőt.', true); return; }
 
     const milestones = collectMilestones();
-    if (!milestones.length) { toast('Add at least one milestone (the opening greeting).', true); return; }
+    if (!milestones.length) { toast('Adj hozzá legalább egy mérföldkövet (a nyitó köszöntőt).', true); return; }
 
     const body = {name, system_prompt, milestones};
     let resp;
@@ -425,16 +422,16 @@
     }
 
     if (!resp.ok) { toast(await resp.text(), true); return; }
-    toast('Spirit saved.');
+    toast('Szellem mentve.');
     closeSpiritModal();
     await load();
   }
 
   async function deleteSpirit(spiritId) {
-    if (!confirm(`Delete spirit "${spirits[spiritId]?.name}"? This cannot be undone.`)) return;
+    if (!confirm(`Törlöd a(z) „${spirits[spiritId]?.name}" szellemet? Ez nem vonható vissza.`)) return;
     const resp = await fetch(`/api/config/spirits/${spiritId}`, {method: 'DELETE'});
     if (!resp.ok) { toast(await resp.text(), true); return; }
-    toast('Spirit deleted.');
+    toast('Szellem törölve.');
     await load();
   }
 
@@ -443,7 +440,7 @@
   function openPlayerModal() {
     const sel = document.getElementById('pSpirit');
     const ids = Object.keys(spirits);
-    if (!ids.length) { toast('Create at least one spirit first.', true); return; }
+    if (!ids.length) { toast('Előbb hozz létre legalább egy szellemet.', true); return; }
     sel.innerHTML = ids.map(id => `<option value="${id}">${esc(spirits[id].name)}</option>`).join('');
     document.getElementById('pName').value = '';
     document.getElementById('playerModal').classList.add('open');
@@ -456,24 +453,24 @@
   async function savePlayer() {
     const name = document.getElementById('pName').value.trim();
     const spirit_id = document.getElementById('pSpirit').value;
-    if (!name) { toast('Player needs a name.', true); return; }
+    if (!name) { toast('A játékosnak kell egy név.', true); return; }
 
     const resp = await fetch('/api/config/players', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({name, spirit_id}),
     });
     if (!resp.ok) { toast(await resp.text(), true); return; }
-    toast('Player added.');
+    toast('Játékos hozzáadva.');
     closePlayerModal();
     await load();
   }
 
   async function deletePlayer(playerId) {
     const p = players.find(x => x.id === playerId);
-    if (!confirm(`Remove player "${p?.name}"?`)) return;
+    if (!confirm(`Eltávolítod „${p?.name}" játékost?`)) return;
     const resp = await fetch(`/api/config/players/${playerId}`, {method: 'DELETE'});
     if (!resp.ok) { toast(await resp.text(), true); return; }
-    toast('Player removed.');
+    toast('Játékos eltávolítva.');
     await load();
   }
 
@@ -492,7 +489,6 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
   }
 
-  // Close modals on backdrop click
   document.getElementById('spiritModal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeSpiritModal();
   });

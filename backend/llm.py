@@ -1,17 +1,29 @@
 """
 LLM integration — builds prompts and calls Claude to generate spirit responses.
 """
+import re
 import anthropic
 from .game_state import SessionState
 
 
-def build_system_prompt(state: SessionState) -> str:
+def reformat_stage_directions(text: str) -> str:
+    """Convert *stage directions* to [stage directions] for display and strip them for TTS."""
+    return re.sub(r'\*([^*]+)\*', r'[\1]', text)
+
+
+def strip_stage_directions(text: str) -> str:
+    """Remove [stage directions] entirely — used before sending text to TTS."""
+    return re.sub(r'\[[^\]]+\]', '', text).strip()
+
+
+def build_system_prompt(state: SessionState, language: str = "Hungarian") -> str:
     spirit = state.spirit
     milestone = state.current_milestone_obj()
 
     parts = [spirit.system_prompt.strip()]
 
     parts.append(f"\nYou are speaking with {state.player.name}, your descendant.")
+    parts.append(f"\nALWAYS respond in {language}, regardless of what language the player uses.")
 
     if milestone and milestone.secret:
         parts.append(
@@ -39,8 +51,9 @@ def build_system_prompt(state: SessionState) -> str:
     return "\n".join(parts)
 
 
-def get_spirit_response(state: SessionState, player_utterance: str, client: anthropic.Anthropic) -> str:
-    system_prompt = build_system_prompt(state)
+def get_spirit_response(state: SessionState, player_utterance: str, client: anthropic.Anthropic, language: str = "Hungarian") -> tuple[str, str]:
+    """Returns (display_text, tts_text). Display text has [stage directions], TTS text has them stripped."""
+    system_prompt = build_system_prompt(state, language)
 
     messages = list(state.conversation_history)
     messages.append({"role": "user", "content": player_utterance})
@@ -52,13 +65,15 @@ def get_spirit_response(state: SessionState, player_utterance: str, client: anth
         messages=messages,
     )
 
-    reply = response.content[0].text
+    raw_reply = response.content[0].text
+    display_text = reformat_stage_directions(raw_reply)
+    tts_text = strip_stage_directions(display_text)
 
     state.conversation_history.append({"role": "user", "content": player_utterance})
-    state.conversation_history.append({"role": "assistant", "content": reply})
+    state.conversation_history.append({"role": "assistant", "content": raw_reply})
 
     # Keep history bounded to avoid token bloat (last 10 exchanges)
     if len(state.conversation_history) > 20:
         state.conversation_history = state.conversation_history[-20:]
 
-    return reply
+    return display_text, tts_text

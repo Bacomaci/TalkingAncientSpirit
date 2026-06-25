@@ -31,6 +31,6 @@ def transcribe_audio(audio_bytes: bytes, model_size: str = "base", language: str
         import resampy
         audio_data = resampy.resample(audio_data, sample_rate, 16000)
 
-    segments, _ = model.transcribe(audio_data, beam_size=5, language=language)
+    segments, _ = model.transcribe(audio_data, beam_size=5, language=language, vad_filter=True)
     text = " ".join(segment.text for segment in segments).strip()
     return text

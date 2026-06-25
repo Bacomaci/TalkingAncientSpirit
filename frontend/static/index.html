@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spirit Bot — Game Master Console</title>
+  <title>Szellem Bot — Játékmester Konzol</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -162,63 +162,63 @@
 </head>
 <body>
   <nav>
-    <span>&#9760; Spirit Bot</span>
-    <a href="index.html" class="nav-link active">&#9654; Run Session</a>
-    <a href="setup.html" class="nav-link">&#9881; Game Setup</a>
+    <span>&#9760; Szellem Bot</span>
+    <a href="index.html" class="nav-link active">&#9654; Játék</a>
+    <a href="setup.html" class="nav-link">&#9881; Beállítások</a>
   </nav>
 
   <div class="layout">
-    <!-- Left panel: controls -->
+    <!-- Bal panel: vezérlők -->
     <div>
-      <!-- Session status -->
+      <!-- Munkamenet állapota -->
       <div class="panel" style="margin-bottom:16px">
-        <h2>Session Status</h2>
-        <div id="statusBadge" class="status-badge status-inactive">INACTIVE</div>
-        <div class="info-row"><span class="info-label">Player</span><span class="info-value" id="infoPlayer">—</span></div>
-        <div class="info-row"><span class="info-label">Spirit</span><span class="info-value" id="infoSpirit">—</span></div>
-        <div class="info-row"><span class="info-label">Milestone</span><span class="info-value" id="infoMilestone">—</span></div>
+        <h2>Munkamenet állapota</h2>
+        <div id="statusBadge" class="status-badge status-inactive">INAKTÍV</div>
+        <div class="info-row"><span class="info-label">Játékos</span><span class="info-value" id="infoPlayer">—</span></div>
+        <div class="info-row"><span class="info-label">Szellem</span><span class="info-value" id="infoSpirit">—</span></div>
+        <div class="info-row"><span class="info-label">Mérföldkő</span><span class="info-value" id="infoMilestone">—</span></div>
         <div class="milestone-bar" id="milestonePips"></div>
       </div>
 
-      <!-- Start session -->
+      <!-- Munkamenet indítása -->
       <div class="panel" style="margin-bottom:16px">
-        <h2>Start Session</h2>
-        <label for="playerSelect">Player</label>
+        <h2>Munkamenet indítása</h2>
+        <label for="playerSelect">Játékos</label>
         <select id="playerSelect">
-          <option value="">Loading...</option>
+          <option value="">Betöltés...</option>
         </select>
         <div class="btn-row">
-          <button class="btn btn-primary" id="btnStart" onclick="startSession()">Summon Spirit</button>
-          <button class="btn btn-danger" id="btnEnd" onclick="endSession()" disabled>End Session</button>
+          <button class="btn btn-primary" id="btnStart" onclick="startSession()">Szellem megidézése</button>
+          <button class="btn btn-danger" id="btnEnd" onclick="endSession()" disabled>Munkamenet befejezése</button>
         </div>
       </div>
 
-      <!-- Milestone -->
+      <!-- Mérföldkő -->
       <div class="panel" style="margin-bottom:16px">
-        <h2>Milestone</h2>
+        <h2>Mérföldkő</h2>
         <p style="font-size:0.82rem;color:#6a5a44;margin-bottom:12px">
-          Advance when the player reaches the next story milestone.
-          The spirit will reveal the associated secret.
+          Lépj tovább, ha a játékos elér egy fontos történeti pillanatot.
+          A szellem ekkor feltárja a hozzá tartozó titkot.
         </p>
         <button class="btn btn-secondary" id="btnMilestone" onclick="advanceMilestone()" disabled>
-          &#8593; Advance to Next Milestone
+          &#8593; Következő mérföldkőre lépés
         </button>
       </div>
 
-      <!-- GM Context -->
+      <!-- GM kontextus -->
       <div class="panel">
-        <h2>Context Injection</h2>
-        <label for="gmContext">Additional info for the spirit (mood, recent events, hints)</label>
-        <textarea id="gmContext" placeholder="e.g. 'The player just failed the fire trial and is visibly shaken. The spirit should be stern but not cruel.'"></textarea>
-        <button class="btn btn-secondary" onclick="updateContext()">Update Context</button>
+        <h2>Kontextus injektálás</h2>
+        <label for="gmContext">További információ a szellemnek (hangulat, közelmúlt eseményei, tippek)</label>
+        <textarea id="gmContext" placeholder="pl. 'A játékos épp elbukott a tűzpróbán és láthatóan megrendült. A szellem legyen szigorú, de ne kegyetlen.'"></textarea>
+        <button class="btn btn-secondary" onclick="updateContext()">Kontextus frissítése</button>
       </div>
     </div>
 
-    <!-- Right panel: transcript -->
+    <!-- Jobb panel: átírat -->
     <div class="panel" style="display:flex;flex-direction:column;">
-      <h2 style="margin-bottom:12px">Live Transcript</h2>
+      <h2 style="margin-bottom:12px">Élő átírat</h2>
       <div id="transcript">
-        <div class="empty-transcript">No conversation yet. Start a session to begin.</div>
+        <div class="empty-transcript">Még nincs párbeszéd. Indíts egy munkamenetet a kezdéshez.</div>
       </div>
     </div>
   </div>
@@ -262,7 +262,7 @@
 
     function applyStatus(data) {
       const badge = document.getElementById('statusBadge');
-      badge.textContent = data.active ? 'ACTIVE' : 'INACTIVE';
+      badge.textContent = data.active ? 'AKTÍV' : 'INAKTÍV';
       badge.className = 'status-badge ' + (data.active ? 'status-active' : 'status-inactive');
 
       document.getElementById('infoPlayer').textContent = data.player_name || '—';
@@ -285,7 +285,7 @@
         let cls = 'milestone-pip';
         if (i < current) cls += ' reached';
         else if (i === current) cls += ' current';
-        return `<div class="${cls}" title="Milestone ${i}"></div>`;
+        return `<div class="${cls}" title="Mérföldkő ${i}"></div>`;
       }).join('');
     }
 
@@ -296,7 +296,7 @@
       if (!playerId) return;
 
       document.getElementById('btnStart').disabled = true;
-      appendMessage('system', 'Starting session...');
+      appendMessage('system', 'Munkamenet indítása...');
 
       const resp = await fetch('/api/session/start', {
         method: 'POST',
@@ -305,7 +305,7 @@
       });
 
       if (!resp.ok) {
-        appendMessage('system', 'Error starting session: ' + resp.statusText);
+        appendMessage('system', 'Hiba a munkamenet indításakor: ' + resp.statusText);
         document.getElementById('btnStart').disabled = false;
         return;
       }
@@ -313,13 +313,12 @@
       const data = await resp.json();
       clearTranscript();
       appendMessage('spirit', data.greeting);
-      playAudio(data.audio_base64);
       await refreshStatus();
     }
 
     async function endSession() {
       await fetch('/api/session/end', {method: 'POST'});
-      appendMessage('system', 'Session ended.');
+      appendMessage('system', 'Munkamenet befejezve.');
       await refreshStatus();
     }
 
@@ -327,9 +326,9 @@
       const resp = await fetch('/api/session/advance_milestone', {method: 'POST'});
       const data = await resp.json();
       if (data.success) {
-        appendMessage('system', `Milestone advanced → "${data.milestone_name}"`);
+        appendMessage('system', `Mérföldkő előrelépve → „${data.milestone_name}"`);
       } else {
-        appendMessage('system', 'Already at final milestone.');
+        appendMessage('system', 'Már az utolsó mérföldkőnél jár.');
       }
       await refreshStatus();
     }
@@ -341,7 +340,7 @@
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({gm_context: ctx}),
       });
-      appendMessage('system', 'GM context updated.');
+      appendMessage('system', 'GM kontextus frissítve.');
     }
 
     // ── UI helpers ────────────────────────────────────────────────────────────
@@ -359,7 +358,7 @@
       if (role !== 'system') {
         const label = document.createElement('div');
         label.className = 'msg-label';
-        label.textContent = role === 'player' ? 'PLAYER' : 'SPIRIT';
+        label.textContent = role === 'player' ? 'JÁTÉKOS' : 'SZELLEM';
         div.appendChild(label);
       }
 

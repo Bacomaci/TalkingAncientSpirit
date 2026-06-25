@@ -20,6 +20,7 @@ def synthesize_speech(
     text: str,
     voice_id: str,
     api_key: str,
+    language_code: str = "hu",
     stability: float = 0.6,
     similarity_boost: float = 0.8,
     style: float = 0.3,
@@ -30,7 +31,8 @@ def synthesize_speech(
     audio_stream = client.text_to_speech.convert(
         voice_id=voice_id,
         text=text,
-        model_id="eleven_multilingual_v2",
+        model_id="eleven_turbo_v2_5",
+        language_code=language_code,
         voice_settings=VoiceSettings(
             stability=stability,
             similarity_boost=similarity_boost,

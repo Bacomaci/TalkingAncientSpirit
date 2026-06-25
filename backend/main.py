@@ -23,6 +23,8 @@ ELEVENLABS_API_KEY = os.environ["ELEVENLABS_API_KEY"]
 ELEVENLABS_VOICE_ID = os.environ["ELEVENLABS_VOICE_ID"]
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "base")
 WHISPER_LANGUAGE = os.getenv("WHISPER_LANGUAGE", "hu")
+SPIRIT_LANGUAGE = os.getenv("SPIRIT_LANGUAGE", "Hungarian")
+TTS_LANGUAGE_CODE = os.getenv("TTS_LANGUAGE_CODE", "hu")
 
 import anthropic as _anthropic
 _llm_client = _anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -64,6 +66,7 @@ class SessionStatus(BaseModel):
     current_milestone: int
     milestone_name: str | None
     gm_context: str
+    listen_seconds: int
 
 
 @app.get("/api/players")
@@ -91,20 +94,35 @@ def start_session(req: StartSessionRequest):
     greeting_seed = milestone.greeting if milestone and milestone.greeting else None
 
     if greeting_seed:
-        opening = greeting_seed
+        opening_display = greeting_seed
+        opening_tts = greeting_seed
     else:
-        opening = get_spirit_response(
+        opening_display, opening_tts = get_spirit_response(
             session,
             f"[The player {player.name} has just placed the bone on the altar and summoned you. Greet them.]",
             _llm_client,
+            SPIRIT_LANGUAGE,
         )
 
-    audio = synthesize_speech(opening, ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY)
+    audio = synthesize_speech(opening_tts, ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
     audio_b64 = base64.b64encode(audio).decode()
 
+    session.greeting = opening_display
+    session.greeting_audio_b64 = audio_b64
+
     return {
-        "greeting": opening,
+        "greeting": opening_display,
         "audio_base64": audio_b64,
+    }
+
+
+@app.get("/api/session/greeting")
+def get_greeting():
+    if not session.session_active or not session.greeting:
+        raise HTTPException(404, "No active greeting")
+    return {
+        "greeting": session.greeting,
+        "audio_base64": session.greeting_audio_b64,
     }
 
 
@@ -144,6 +162,7 @@ def get_status():
         current_milestone=session.current_milestone,
         milestone_name=m.name if m else None,
         gm_context=session.gm_context,
+        listen_seconds=session.spirit.listen_seconds if session.spirit else 10,
     )
 
 
@@ -154,25 +173,36 @@ async def speak(file: UploadFile = File(...)):
         raise HTTPException(400, "No active session — GM must start a session first")
 
     audio_bytes = await file.read()
-    player_text = transcribe_audio(audio_bytes, WHISPER_MODEL, WHISPER_LANGUAGE)
+    try:
+        player_text = transcribe_audio(audio_bytes, WHISPER_MODEL, WHISPER_LANGUAGE)
+    except Exception as e:
+        raise HTTPException(500, f"STT error: {e}") from e
 
     if not player_text:
         raise HTTPException(422, "Could not transcribe audio")
 
-    reply_text = get_spirit_response(session, player_text, _llm_client)
-    audio = synthesize_speech(reply_text, ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY)
+    try:
+        reply_display, reply_tts = get_spirit_response(session, player_text, _llm_client, SPIRIT_LANGUAGE)
+    except Exception as e:
+        raise HTTPException(500, f"LLM error: {e}") from e
+
+    try:
+        audio = synthesize_speech(reply_tts, ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
+    except Exception as e:
+        raise HTTPException(500, f"TTS error: {e}") from e
+
     audio_b64 = base64.b64encode(audio).decode()
 
     # Push transcript to GM console via WebSocket
     await _broadcast({
         "type": "transcript",
         "player_said": player_text,
-        "spirit_said": reply_text,
+        "spirit_said": reply_display,
     })
 
     return {
         "player_said": player_text,
-        "spirit_said": reply_text,
+        "spirit_said": reply_display,
         "audio_base64": audio_b64,
     }
 
