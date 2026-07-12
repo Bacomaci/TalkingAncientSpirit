@@ -1,0 +1,8 @@
+- Add player gender and age to config
+- Add multiple spirit voices
+- Try local LLM
+- Realize conversation caching and loading
+- Convert milestone counter to locally edit-able global days counter
+- NFT integration
+- Microphone listening time fix
+- Limit conversation length & end conversation when it matured
