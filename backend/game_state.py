@@ -21,6 +21,7 @@ class Milestone:
 class Spirit:
     name: str
     system_prompt: str
+    full_system_prompt:str
     milestones: list[Milestone]
     listen_seconds: int = 10
 
@@ -30,6 +31,8 @@ class Player:
     id: str
     name: str
     spirit_id: str
+    gender: str
+    age: str
 
 
 @dataclass
@@ -79,7 +82,11 @@ class GameConfig:
                 id=p["id"],
                 name=p["name"],
                 spirit_id=p["spirit"],
+                gender=p["gender"],
+                age=p["age"]
             )
+
+        common_lore = data.get("common_lore", "")
 
         self.spirits: dict[str, Spirit] = {}
         for sid, sdata in data.get("spirits", {}).items():
@@ -93,9 +100,13 @@ class GameConfig:
                 )
                 for m in sdata.get("milestones", [])
             ]
+
+            full_system_prompt = common_lore + "\n\n<your_personality>\n" + sdata["system_prompt"] + "\n<\\your_personality>"
+
             self.spirits[sid] = Spirit(
                 name=sdata["name"],
-                system_prompt=sdata["system_prompt"],
+                system_prompt = sdata["system_prompt"],
+                full_system_prompt=full_system_prompt,
                 milestones=milestones,
                 listen_seconds=sdata.get("listen_seconds", 10),
             )

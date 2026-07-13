@@ -266,7 +266,7 @@ def add_player(req: PlayerIn):
     if req.spirit_id not in game_config.spirits:
         raise HTTPException(404, f"Spirit '{req.spirit_id}' not found")
     from .game_state import Player
-    game_config.players[player_id] = Player(id=player_id, name=req.name, spirit_id=req.spirit_id)
+    game_config.players[player_id] = Player(id=player_id, name=req.name, spirit_id=req.spirit_id, gender="TODO", age="TODO")
     game_config.save()
     return {"id": player_id}
 
@@ -297,6 +297,7 @@ def add_spirit(req: SpiritIn):
     game_config.spirits[spirit_id] = Spirit(
         name=req.name,
         system_prompt=req.system_prompt,
+        full_system_prompt=req.system_prompt,
         milestones=milestones,
     )
     game_config.save()
@@ -321,6 +322,7 @@ def update_spirit(spirit_id: str, req: SpiritIn):
     game_config.spirits[spirit_id] = Spirit(
         name=req.name,
         system_prompt=req.system_prompt,
+        full_system_prompt=req.system_prompt,
         milestones=milestones,
     )
     game_config.save()
