@@ -4,5 +4,9 @@
 - Realize conversation caching and loading
 - Convert milestone counter to locally edit-able global days counter
 - NFT integration
-- Microphone listening time fix
+~~Microphone listening time fix~~
 - Limit conversation length & end conversation when it matured
+~~System prompt edit-time yaml syncing~~
+- Stage directions and special words fix?
+- Add hums and whatnot for end of recording
+- Optional: add full system prompt generation after edit
