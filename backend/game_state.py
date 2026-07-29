@@ -25,7 +25,7 @@ class Spirit:
     milestones: list[Milestone]
     listen_seconds: int = 10
     current_day: int = 0
-    voice_id: str = ""
+    voice_name: str = ""
     max_exchanges: int = 20
 
 
@@ -93,6 +93,7 @@ class GameConfig:
                 keywords=p.get("keywords", []),
             )
 
+        self.voices: dict[str, str] = data.get("voices", {})  # name -> ElevenLabs voice ID
         common_lore = data.get("common_lore", "")
 
         self.spirits: dict[str, Spirit] = {}
@@ -117,9 +118,13 @@ class GameConfig:
                 milestones=milestones,
                 listen_seconds=sdata.get("listen_seconds", 10),
                 current_day=sdata.get("current_day", 0),
-                voice_id=sdata.get("voice_id", ""),
+                voice_name=sdata.get("voice_name", ""),
                 max_exchanges=sdata.get("max_exchanges", 20),
             )
+
+    def resolve_voice_id(self, spirit: "Spirit") -> str:
+        """Return the ElevenLabs voice ID for a spirit, or empty string if not found."""
+        return self.voices.get(spirit.voice_name, "")
 
     def get_player(self, player_id: str) -> Optional[Player]:
         return self.players.get(player_id)
@@ -140,7 +145,7 @@ class GameConfig:
                 "system_prompt": s.system_prompt,
                 "listen_seconds": s.listen_seconds,
                 "current_day": s.current_day,
-                "voice_id": s.voice_id,
+                "voice_name": s.voice_name,
                 "max_exchanges": s.max_exchanges,
                 "milestones": [
                     {
@@ -153,7 +158,7 @@ class GameConfig:
                     for m in s.milestones
                 ],
             }
-        return {"players": players_list, "spirits": spirits_dict}
+        return {"voices": self.voices, "players": players_list, "spirits": spirits_dict}
 
     def save(self):
         with open(self._config_path, "w", encoding="utf-8") as f:

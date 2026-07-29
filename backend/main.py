@@ -218,7 +218,7 @@ async def speak(file: UploadFile = File(...)):
         raise HTTPException(500, f"LLM error: {e}") from e
 
     try:
-        audio = synthesize_speech(reply_tts, session.spirit.voice_id or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
+        audio = synthesize_speech(reply_tts, game_config.resolve_voice_id(session.spirit) or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
     except Exception as e:
         raise HTTPException(500, f"TTS error: {e}") from e
 
@@ -286,13 +286,14 @@ class SpiritIn(BaseModel):
     name: str
     system_prompt: str
     milestones: list[MilestoneIn]
-    voice_id: str = ""
+    voice_name: str = ""
 
 class PlayerIn(BaseModel):
     name: str
     spirit_id: str
     gender: str = ""
     age: str = ""
+    keywords: list[str] = []
 
 class FullConfig(BaseModel):
     players: list[dict]
@@ -326,7 +327,7 @@ def add_player(req: PlayerIn):
     if req.spirit_id not in game_config.spirits:
         raise HTTPException(404, f"Spirit '{req.spirit_id}' not found")
     from .game_state import Player
-    game_config.players[player_id] = Player(id=player_id, name=req.name, spirit_id=req.spirit_id, gender=req.gender, age=req.age)
+    game_config.players[player_id] = Player(id=player_id, name=req.name, spirit_id=req.spirit_id, gender=req.gender, age=req.age, keywords=req.keywords)
     game_config.save()
     return {"id": player_id}
 
@@ -359,7 +360,7 @@ def add_spirit(req: SpiritIn):
         system_prompt=req.system_prompt,
         full_system_prompt=req.system_prompt,
         milestones=milestones,
-        voice_id=req.voice_id,
+        voice_name=req.voice_name,
     )
     game_config.save()
     return {"id": spirit_id}
@@ -386,7 +387,7 @@ def update_spirit(spirit_id: str, req: SpiritIn):
         system_prompt=req.system_prompt,
         full_system_prompt=req.system_prompt,
         milestones=milestones,
-        voice_id=req.voice_id,
+        voice_name=req.voice_name,
         current_day=existing.current_day,
     )
     game_config.save()

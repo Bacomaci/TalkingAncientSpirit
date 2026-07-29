@@ -1,5 +1,10 @@
 # Játékkonfiguráció — szerkeszd ezt a LARP-esemény előkészítéséhez
 
+# Hangok — ElevenLabs voice ID-k névvel ellátva
+voices:
+  Alaric Male: "21m00Tcm4TlvDq8ikWAM"
+  Ancient Female: "EXAVITQu4vr4xnSDxMaL"
+
 # Játékosok listája
 players:
   - id: player_1
@@ -74,6 +79,7 @@ spirits:
     listen_seconds: 10
     current_day: 0
     max_exchanges: 20
+    voice_name: "Alaric Male"
     # A szellem személyiségét és hátterét meghatározó rendszerprompt
     system_prompt: |
       Te Alaric vagy, egy régen elhunyt ős ősi szelleme. Évszázadok óta őrködöl a vérvonalad felett.

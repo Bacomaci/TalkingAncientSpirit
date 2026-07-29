@@ -201,8 +201,8 @@
     <textarea id="sPrompt" style="min-height:120px"
       placeholder="Te Alaric vagy, egy ős szelleme, aki a családi birtok védelmében halt meg. Súllyal és alkalmi sötét humorral beszélsz. Nevén szólítod leszármazottadat. Válaszaid ne legyenek hosszabbak 5 mondatnál, kivéve ha titkot társz fel."></textarea>
 
-    <label>ElevenLabs hang azonosító <small style="color:#6a5a44">— voice ID; üresen hagyva az alapértelmezett hangot használja</small></label>
-    <input type="text" id="sVoiceId" placeholder="pl. 21m00Tcm4TlvDq8ikWAM" />
+    <label>Hang <small style="color:#6a5a44">— a szellemhez rendelt hang</small></label>
+    <select id="sVoiceName"></select>
 
     <hr class="divider" />
     <h3>Mérföldkövek &amp; Titkok</h3>
@@ -243,6 +243,8 @@
     </div>
     <label>Hozzárendelt szellem</label>
     <select id="pSpirit"></select>
+    <label>Azonosító kulcsszavak <small style="color:#6a5a44">— vesszővel elválasztva, pl. Erindel, harcos, bosszú</small></label>
+    <input type="text" id="pKeywords" placeholder="Erindel, harcos, bosszú" />
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closePlayerModal()">Mégse</button>
       <button class="btn btn-primary" onclick="savePlayer()">Játékos hozzáadása</button>
@@ -256,6 +258,7 @@
 <script>
   let spirits = {};
   let players = [];
+  let voices = {};  // name -> voice_id
   let editingSpiritId = null;
 
   // ── Boot ─────────────────────────────────────────────────────────────────
@@ -265,6 +268,7 @@
     const data = await resp.json();
     spirits = data.spirits || {};
     players = data.players || [];
+    voices = data.voices || {};
     renderSpirits();
     renderPlayers();
   }
@@ -320,6 +324,13 @@
 
   // ── Spirit modal ──────────────────────────────────────────────────────────
 
+  function populateVoiceDropdown(selectedName) {
+    const sel = document.getElementById('sVoiceName');
+    const names = Object.keys(voices);
+    sel.innerHTML = '<option value="">— alapértelmezett hang —</option>' +
+      names.map(n => `<option value="${esc(n)}" ${n === selectedName ? 'selected' : ''}>${esc(n)}</option>`).join('');
+  }
+
   function openSpiritModal(spiritId) {
     editingSpiritId = spiritId;
     document.getElementById('spiritModalTitle').textContent = spiritId ? 'Szellem szerkesztése' : 'Szellem hozzáadása';
@@ -328,12 +339,12 @@
       const s = spirits[spiritId];
       document.getElementById('sName').value = s.name;
       document.getElementById('sPrompt').value = s.system_prompt;
-      document.getElementById('sVoiceId').value = s.voice_id || '';
+      populateVoiceDropdown(s.voice_name || '');
       renderMilestones(s.milestones || []);
     } else {
       document.getElementById('sName').value = '';
       document.getElementById('sPrompt').value = '';
-      document.getElementById('sVoiceId').value = '';
+      populateVoiceDropdown('');
       renderMilestones([{name: 'Nyitó köszöntő', greeting: '', secret: '', secret_intro: ''}]);
     }
     document.getElementById('spiritModal').classList.add('open');
@@ -429,7 +440,7 @@
     const milestones = collectMilestones();
     if (!milestones.length) { toast('Adj hozzá legalább egy mérföldkövet (a nyitó köszöntőt).', true); return; }
 
-    const body = {name, system_prompt, milestones, voice_id: document.getElementById('sVoiceId').value.trim()};
+    const body = {name, system_prompt, milestones, voice_name: document.getElementById('sVoiceName').value};
     let resp;
     if (editingSpiritId) {
       resp = await fetch(`/api/config/spirits/${editingSpiritId}`, {
@@ -465,6 +476,7 @@
     document.getElementById('pName').value = '';
     document.getElementById('pGender').value = '';
     document.getElementById('pAge').value = '';
+    document.getElementById('pKeywords').value = '';
     document.getElementById('playerModal').classList.add('open');
   }
 
@@ -477,11 +489,13 @@
     const spirit_id = document.getElementById('pSpirit').value;
     const gender = document.getElementById('pGender').value;
     const age = document.getElementById('pAge').value.trim();
+    const keywords = document.getElementById('pKeywords').value
+      .split(',').map(k => k.trim()).filter(k => k.length > 0);
     if (!name) { toast('A játékosnak kell egy név.', true); return; }
 
     const resp = await fetch('/api/config/players', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({name, spirit_id, gender, age}),
+      body: JSON.stringify({name, spirit_id, gender, age, keywords}),
     });
     if (!resp.ok) { toast(await resp.text(), true); return; }
     toast('Játékos hozzáadva.');
