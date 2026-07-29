@@ -25,6 +25,7 @@ class Spirit:
     milestones: list[Milestone]
     listen_seconds: int = 10
     current_day: int = 0
+    voice_id: str = ""
 
 
 @dataclass
@@ -47,6 +48,7 @@ class SessionState:
     conversation_history: list = field(default_factory=list)
     greeting: Optional[str] = None
     greeting_audio_b64: Optional[str] = None
+    exchange_count: int = 0       # Number of completed player→spirit exchanges
 
     def current_milestone_obj(self) -> Optional[Milestone]:
         if self.spirit is None:
@@ -66,6 +68,7 @@ class SessionState:
 
     def reset_conversation(self):
         self.conversation_history = []
+        self.exchange_count = 0
 
 
 def _slugify(name: str) -> str:
@@ -113,6 +116,7 @@ class GameConfig:
                 milestones=milestones,
                 listen_seconds=sdata.get("listen_seconds", 10),
                 current_day=sdata.get("current_day", 0),
+                voice_id=sdata.get("voice_id", ""),
             )
 
     def get_player(self, player_id: str) -> Optional[Player]:
@@ -134,6 +138,7 @@ class GameConfig:
                 "system_prompt": s.system_prompt,
                 "listen_seconds": s.listen_seconds,
                 "current_day": s.current_day,
+                "voice_id": s.voice_id,
                 "milestones": [
                     {
                         "id": m.id,

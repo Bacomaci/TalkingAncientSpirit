@@ -5,6 +5,13 @@ import re
 import anthropic
 from .game_state import SessionState
 
+MAX_EXCHANGES = 20
+# Farewell words the player might use to end the conversation (Hungarian + English)
+_FAREWELL_PATTERNS = re.compile(
+    r'\b(viszlát|isten veled|isten hozzád|búcsúzom|elmegyek|mennem kell|goodbye|farewell|i must go|i have to go)\b',
+    re.IGNORECASE
+)
+
 
 def reformat_stage_directions(text: str) -> str:
     """Convert *stage directions* to [stage directions] for display and strip them for TTS."""
@@ -14,6 +21,11 @@ def reformat_stage_directions(text: str) -> str:
 def strip_stage_directions(text: str) -> str:
     """Remove [stage directions] entirely — used before sending text to TTS."""
     return re.sub(r'\[[^\]]+\]', '', text).strip()
+
+
+def player_wants_to_leave(text: str) -> bool:
+    return bool(_FAREWELL_PATTERNS.search(text))
+
 
 def build_dynamic_context_message(state: SessionState) -> str:
     """
@@ -35,9 +47,22 @@ def build_dynamic_context_message(state: SessionState) -> str:
     if state.gm_context.strip():
         context_parts.append(f"ÚJ KONTEXTUS A JÁTÉKMESTERTŐL: {state.gm_context.strip()}. Válaszolj ennek figyelembevételével!")
 
+    # Weariness cues as the conversation nears its end
+    remaining = MAX_EXCHANGES - state.exchange_count
+    if remaining <= 3 and remaining > 0:
+        context_parts.append(
+            "A szellem ereje fogytán van. Éreztesd, hogy egyre nehezebb fenntartani a kapcsolatot — "
+            "fáradtság, távolodás, elmosódó szavak. Még válaszolj, de jelezd a közelgő véget."
+        )
+    elif remaining == 0:
+        context_parts.append(
+            "Ez az utolsó válasz. Búcsúzz el méltósággal — adj okot a távozásra (pl. gyengül a kötelék, "
+            "visszahív a túlvilág, elfogyott az erőd). Zárj le mindent."
+        )
+
     context_parts.append("</current_game_status>")
     return "\n".join(context_parts)
-    
+
 
 def get_spirit_response(state: SessionState, player_utterance, client: anthropic.Anthropic, language: str = "Hungarian") -> tuple[str, str]:
     """Returns (display_text, tts_text). Uses Anthropic Prompt Caching for the system lore. Display text has [stage directions], TTS text has them stripped."""
@@ -49,7 +74,7 @@ def get_spirit_response(state: SessionState, player_utterance, client: anthropic
 
     # Global static system prompt plus character guidance originating from config.yaml
     base_system = spirit.full_system_prompt.strip()
-    
+
     # Static system prompt plus character guidance
     static_system_prompt = (
         f"{base_system}\n\n"
@@ -61,27 +86,27 @@ def get_spirit_response(state: SessionState, player_utterance, client: anthropic
         "<\\direct_context>"
     )
 
-    # Dynamic context (milestones or context injection if it exists)
+    # Dynamic context (milestones, weariness cues, or GM context injection)
     dynamic_context = build_dynamic_context_message(state)
 
     # Assemble messages
     messages = []
-    
+
     # Dynamic context presented as a system notification coming from the user
     messages.append({
-        "role": "user", 
+        "role": "user",
         "content": f"[SYSTEM NOTIFICATION: {dynamic_context}]"
     })
-    
+
     # Then last 10 exchanges
     messages.extend(state.conversation_history)
-    
+
     # Then current message of the player
     messages.append({"role": "user", "content": player_utterance})
 
     # Prompt Claude-3-5-Sonnet-20241022 (or haiku) supports prompt caching syntax
     response = client.messages.create(
-        model="claude-sonnet-4-6", 
+        model="claude-sonnet-4-6",
         max_tokens=512,
         system=[
             {
@@ -100,6 +125,7 @@ def get_spirit_response(state: SessionState, player_utterance, client: anthropic
     # Player utterance and reply get saved to history
     state.conversation_history.append({"role": "user", "content": player_utterance})
     state.conversation_history.append({"role": "assistant", "content": raw_reply})
+    state.exchange_count += 1
 
     # Conversation history has a short length to keep token usage down
     if len(state.conversation_history) > 20:

@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from .game_state import GameConfig, SessionState, _slugify
-from .llm import get_spirit_response
+from .llm import get_spirit_response, player_wants_to_leave, MAX_EXCHANGES
 from .stt import transcribe_audio
 from .tts import synthesize_speech
 
@@ -218,23 +218,35 @@ async def speak(file: UploadFile = File(...)):
         raise HTTPException(500, f"LLM error: {e}") from e
 
     try:
-        audio = synthesize_speech(reply_tts, ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
+        audio = synthesize_speech(reply_tts, session.spirit.voice_id or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
     except Exception as e:
         raise HTTPException(500, f"TTS error: {e}") from e
 
     audio_b64 = base64.b64encode(audio).decode()
+
+    # Determine whether the session should end after this reply
+    farewell = player_wants_to_leave(player_text)
+    limit_reached = session.exchange_count >= MAX_EXCHANGES
+    end_session_now = farewell or limit_reached
+
+    if end_session_now:
+        _save_conversation()
+        session.session_active = False
+        session.reset_conversation()
 
     # Push transcript to GM console via WebSocket
     await _broadcast({
         "type": "transcript",
         "player_said": player_text,
         "spirit_said": reply_display,
+        **({"type_hint": "farewell"} if farewell else {}),
     })
 
     return {
         "player_said": player_text,
         "spirit_said": reply_display,
         "audio_base64": audio_b64,
+        "session_ended": end_session_now,
     }
 
 
@@ -274,10 +286,13 @@ class SpiritIn(BaseModel):
     name: str
     system_prompt: str
     milestones: list[MilestoneIn]
+    voice_id: str = ""
 
 class PlayerIn(BaseModel):
     name: str
     spirit_id: str
+    gender: str = ""
+    age: str = ""
 
 class FullConfig(BaseModel):
     players: list[dict]
@@ -311,7 +326,7 @@ def add_player(req: PlayerIn):
     if req.spirit_id not in game_config.spirits:
         raise HTTPException(404, f"Spirit '{req.spirit_id}' not found")
     from .game_state import Player
-    game_config.players[player_id] = Player(id=player_id, name=req.name, spirit_id=req.spirit_id, gender="TODO", age="TODO")
+    game_config.players[player_id] = Player(id=player_id, name=req.name, spirit_id=req.spirit_id, gender=req.gender, age=req.age)
     game_config.save()
     return {"id": player_id}
 
@@ -344,6 +359,7 @@ def add_spirit(req: SpiritIn):
         system_prompt=req.system_prompt,
         full_system_prompt=req.system_prompt,
         milestones=milestones,
+        voice_id=req.voice_id,
     )
     game_config.save()
     return {"id": spirit_id}
@@ -364,11 +380,14 @@ def update_spirit(spirit_id: str, req: SpiritIn):
         )
         for i, m in enumerate(req.milestones)
     ]
+    existing = game_config.spirits[spirit_id]
     game_config.spirits[spirit_id] = Spirit(
         name=req.name,
         system_prompt=req.system_prompt,
         full_system_prompt=req.system_prompt,
         milestones=milestones,
+        voice_id=req.voice_id,
+        current_day=existing.current_day,
     )
     game_config.save()
     return {"status": "updated"}

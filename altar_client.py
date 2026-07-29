@@ -245,6 +245,9 @@ def run_conversation_loop():
                 print(f"  [Spirit]:   {data['spirit_said']}\n")
                 mp3 = base64.b64decode(data["audio_base64"])
                 play_audio_mp3(mp3)
+                if data.get("session_ended"):
+                    print("  [Session ended by spirit]\n")
+                    break
             except httpx.HTTPStatusError as e:
                 print(f"  [Backend error {e.response.status_code}: {e.response.text}]")
                 time.sleep(1)
