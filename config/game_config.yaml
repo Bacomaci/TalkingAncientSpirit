@@ -73,6 +73,7 @@ spirits:
     name: "Alaric"
     listen_seconds: 10
     current_day: 0
+    max_exchanges: 20
     # A szellem személyiségét és hátterét meghatározó rendszerprompt
     system_prompt: |
       Te Alaric vagy, egy régen elhunyt ős ősi szelleme. Évszázadok óta őrködöl a vérvonalad felett.

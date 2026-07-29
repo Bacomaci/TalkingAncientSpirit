@@ -26,6 +26,7 @@ class Spirit:
     listen_seconds: int = 10
     current_day: int = 0
     voice_id: str = ""
+    max_exchanges: int = 20
 
 
 @dataclass
@@ -117,6 +118,7 @@ class GameConfig:
                 listen_seconds=sdata.get("listen_seconds", 10),
                 current_day=sdata.get("current_day", 0),
                 voice_id=sdata.get("voice_id", ""),
+                max_exchanges=sdata.get("max_exchanges", 20),
             )
 
     def get_player(self, player_id: str) -> Optional[Player]:
@@ -139,6 +141,7 @@ class GameConfig:
                 "listen_seconds": s.listen_seconds,
                 "current_day": s.current_day,
                 "voice_id": s.voice_id,
+                "max_exchanges": s.max_exchanges,
                 "milestones": [
                     {
                         "id": m.id,

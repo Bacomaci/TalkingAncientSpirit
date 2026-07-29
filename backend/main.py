@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from .game_state import GameConfig, SessionState, _slugify
-from .llm import get_spirit_response, player_wants_to_leave, MAX_EXCHANGES
+from .llm import get_spirit_response, player_wants_to_leave
 from .stt import transcribe_audio
 from .tts import synthesize_speech
 
@@ -226,7 +226,7 @@ async def speak(file: UploadFile = File(...)):
 
     # Determine whether the session should end after this reply
     farewell = player_wants_to_leave(player_text)
-    limit_reached = session.exchange_count >= MAX_EXCHANGES
+    limit_reached = session.exchange_count >= session.spirit.max_exchanges
     end_session_now = farewell or limit_reached
 
     if end_session_now:

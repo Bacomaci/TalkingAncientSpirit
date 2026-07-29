@@ -5,7 +5,7 @@ import re
 import anthropic
 from .game_state import SessionState
 
-MAX_EXCHANGES = 20
+MAX_EXCHANGES = 20  # fallback default, overridden per spirit via config
 # Farewell words the player might use to end the conversation (Hungarian + English)
 _FAREWELL_PATTERNS = re.compile(
     r'\b(viszlát|isten veled|isten hozzád|búcsúzom|elmegyek|mennem kell|goodbye|farewell|i must go|i have to go)\b',
@@ -48,7 +48,8 @@ def build_dynamic_context_message(state: SessionState) -> str:
         context_parts.append(f"ÚJ KONTEXTUS A JÁTÉKMESTERTŐL: {state.gm_context.strip()}. Válaszolj ennek figyelembevételével!")
 
     # Weariness cues as the conversation nears its end
-    remaining = MAX_EXCHANGES - state.exchange_count
+    max_ex = state.spirit.max_exchanges if state.spirit else MAX_EXCHANGES
+    remaining = max_ex - state.exchange_count
     if remaining <= 3 and remaining > 0:
         context_parts.append(
             "A szellem ereje fogytán van. Éreztesd, hogy egyre nehezebb fenntartani a kapcsolatot — "
