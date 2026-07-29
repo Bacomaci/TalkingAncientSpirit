@@ -7,9 +7,9 @@
 - Realize conversation caching and loading
     - During each conversation, record the conversation in textual format. Date, player who conversed, and the transcript of the discussion. This is for archival reasons, as the Game Master wants to be able to read the conversation after it happened.
 - Milestones should should progress each day as we assume that players will complete one milestone per day. It should still be manually edit-able per spirit.
-- Limit conversation length & end conversation when it matured
-- Add multiple spirit voices
-- Add player gender and age to config
+- Conversation length per summoning should be limited to 20 back-and-forth or until conversation has matured. Towards the end, the spirit should express weariness about continuing the conversation. At the end it should give a reason for ending it. The system should also realize when the player wants to end the conversation and do so then.
+- There should be multiple voice ids to choose from. There are male and female, weary and energetic spirits.
+- Player characters also have a gender and an age. This is important for how spirits address them. This should be added to the player edit and config.
 - Add hums and whatnot for end of recording
 - Pronounciation dictionary
 ~~Try local LLM~~
