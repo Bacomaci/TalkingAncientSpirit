@@ -24,6 +24,7 @@ class Spirit:
     full_system_prompt:str
     milestones: list[Milestone]
     listen_seconds: int = 10
+    current_day: int = 0
 
 
 @dataclass
@@ -33,6 +34,7 @@ class Player:
     spirit_id: str
     gender: str
     age: str
+    keywords: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -83,7 +85,8 @@ class GameConfig:
                 name=p["name"],
                 spirit_id=p["spirit"],
                 gender=p["gender"],
-                age=p["age"]
+                age=p["age"],
+                keywords=p.get("keywords", []),
             )
 
         common_lore = data.get("common_lore", "")
@@ -109,6 +112,7 @@ class GameConfig:
                 full_system_prompt=full_system_prompt,
                 milestones=milestones,
                 listen_seconds=sdata.get("listen_seconds", 10),
+                current_day=sdata.get("current_day", 0),
             )
 
     def get_player(self, player_id: str) -> Optional[Player]:
@@ -120,7 +124,7 @@ class GameConfig:
     def to_dict(self) -> dict:
         """Serialize config back to the YAML-compatible dict structure."""
         players_list = [
-            {"id": p.id, "name": p.name, "spirit": p.spirit_id}
+            {"id": p.id, "name": p.name, "spirit": p.spirit_id, "gender": p.gender, "age": p.age, "keywords": p.keywords}
             for p in self.players.values()
         ]
         spirits_dict = {}
@@ -129,6 +133,7 @@ class GameConfig:
                 "name": s.name,
                 "system_prompt": s.system_prompt,
                 "listen_seconds": s.listen_seconds,
+                "current_day": s.current_day,
                 "milestones": [
                     {
                         "id": m.id,

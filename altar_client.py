@@ -7,6 +7,7 @@ import io
 import base64
 import tempfile
 import time
+import sys
 
 import httpx
 import sounddevice as sd
@@ -172,6 +173,50 @@ def audio_to_wav_bytes(audio: np.ndarray) -> bytes:
     return buf.getvalue()
 
 
+def wake_up_altar() -> bool:
+    """Return True when the altar should wake up and start player identification.
+    In testing mode this triggers on spacebar press; replace with real sensor logic for production.
+    """
+    if sys.stdin.isatty():
+        try:
+            import msvcrt
+            if msvcrt.kbhit():
+                key = msvcrt.getwch()
+                return key == ' '
+        except ImportError:
+            import select
+            if select.select([sys.stdin], [], [], 0)[0]:
+                sys.stdin.read(1)
+                return True
+    return False
+
+
+def identify_player(client: httpx.Client) -> str | None:
+    """Listen for player introduction, send to backend for keyword matching, return player_id."""
+    print("\n  [Identifying player — please speak your name and allegiance...]\n")
+    audio = record_vad_window(
+        max_duration_seconds=MAX_LISTEN_SECONDS,
+        min_duration_seconds=5,
+        silence_timeout=SILENCE_TIMEOUT,
+    )
+    wav_bytes = audio_to_wav_bytes(audio)
+    try:
+        resp = client.post("/api/identify", files={"file": ("audio.wav", wav_bytes, "audio/wav")})
+        resp.raise_for_status()
+        data = resp.json()
+        print(f"  [Heard]: {data['transcribed']}")
+        scores = data["scores"]
+        if not scores or scores[0]["matches"] == 0:
+            print("  [No player keywords matched]")
+            return None
+        best = scores[0]
+        print(f"  [Identified]: {best['player_name']} ({best['matches']} keyword matches)")
+        return best["player_id"]
+    except Exception as e:
+        print(f"  [Identification error: {e}]")
+        return None
+
+
 def run_conversation_loop():
     print("\n  [Session active. Speak to the spirit. Press Ctrl+C to stop.]\n")
     with httpx.Client(base_url=BACKEND_URL, timeout=60.0) as client:
@@ -224,6 +269,31 @@ def wait_for_session() -> dict:
             time.sleep(2)
 
 
+def autonomous_wake_and_identify() -> str | None:
+    """Idle loop: wait for wake trigger, then identify the player via voice.
+    Returns a player_id on success, None if identification fails (caller should retry).
+    """
+    print("  [Altar idle — waiting for wake trigger (press SPACE to wake)...]")
+    while not wake_up_altar():
+        time.sleep(0.1)
+
+    print("  [Altar awake!]")
+    with httpx.Client(base_url=BACKEND_URL, timeout=30.0) as client:
+        player_id = identify_player(client)
+        if player_id is None:
+            return None
+
+        # Start the session on the backend
+        try:
+            resp = client.post("/api/session/start", json={"player_id": player_id})
+            resp.raise_for_status()
+            print(f"  [Session started for player_id={player_id}]")
+            return player_id
+        except Exception as e:
+            print(f"  [Failed to start session: {e}]")
+            return None
+
+
 def fetch_and_play_greeting(client: httpx.Client):
     """Wait until greeting is ready, then play it."""
     print("  [Waiting for greeting...]")
@@ -245,9 +315,18 @@ def main():
     print("=== LARP Spirit Altar Client ===")
     print(f"Connecting to backend at {BACKEND_URL}")
 
+    gm_mode = "--gm" in sys.argv  # Pass --gm to use old GM-driven session start
+
     while True:
-        status = wait_for_session()
-        print(f"\nSpirit '{status['spirit_name']}' awakens...\n")
+        if gm_mode:
+            status = wait_for_session()
+            print(f"\nSpirit '{status['spirit_name']}' awakens...\n")
+        else:
+            player_id = None
+            while player_id is None:
+                player_id = autonomous_wake_and_identify()
+                if player_id is None:
+                    print("  [Identification failed — returning to idle]\n")
 
         with httpx.Client(base_url=BACKEND_URL, timeout=60.0) as client:
             fetch_and_play_greeting(client)

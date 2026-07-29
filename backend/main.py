@@ -3,6 +3,8 @@ FastAPI backend — REST + WebSocket server for the LARP spirit bot.
 """
 import os
 import base64
+import datetime
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, UploadFile, File
@@ -84,9 +86,14 @@ def start_session(req: StartSessionRequest):
     if not spirit:
         raise HTTPException(404, f"Spirit not found for player '{req.player_id}'")
 
+    # Save any previous conversation before resetting
+    if session.session_active and session.conversation_history:
+        _save_conversation()
+
     session.player = player
     session.spirit = spirit
     session.session_active = True
+    session.current_milestone = min(spirit.current_day, len(spirit.milestones) - 1)
     session.reset_conversation()
 
     # Generate opening greeting using the spirit
@@ -128,6 +135,8 @@ def get_greeting():
 
 @app.post("/api/session/end")
 def end_session():
+    if session.session_active and session.conversation_history:
+        _save_conversation()
     session.session_active = False
     session.reset_conversation()
     return {"status": "ended"}
@@ -164,6 +173,28 @@ def get_status():
         gm_context=session.gm_context,
         listen_seconds=session.spirit.listen_seconds if session.spirit else 10,
     )
+
+
+@app.post("/api/identify")
+async def identify_player(file: UploadFile = File(...)):
+    """Transcribe audio and return keyword match scores for all players."""
+    audio_bytes = await file.read()
+    try:
+        text = transcribe_audio(audio_bytes, WHISPER_MODEL, WHISPER_LANGUAGE)
+    except Exception as e:
+        raise HTTPException(500, f"STT error: {e}") from e
+
+    if not text:
+        raise HTTPException(422, "Could not transcribe audio")
+
+    text_lower = text.lower()
+    scores = []
+    for player in game_config.players.values():
+        matches = sum(1 for kw in player.keywords if kw.lower() in text_lower)
+        scores.append({"player_id": player.id, "player_name": player.name, "matches": matches})
+
+    scores.sort(key=lambda x: x["matches"], reverse=True)
+    return {"transcribed": text, "scores": scores}
 
 
 @app.post("/api/speak")
@@ -258,6 +289,20 @@ def get_config():
     return game_config.to_dict()
 
 
+@app.post("/api/config/spirits/{spirit_id}/advance_day")
+def advance_day(spirit_id: str):
+    """Increment the day counter for a spirit, advancing its default milestone."""
+    if spirit_id not in game_config.spirits:
+        raise HTTPException(404, "Spirit not found")
+    spirit = game_config.spirits[spirit_id]
+    max_day = len(spirit.milestones) - 1
+    if spirit.current_day >= max_day:
+        return {"current_day": spirit.current_day, "advanced": False, "message": "Already at final milestone"}
+    spirit.current_day += 1
+    game_config.save()
+    return {"current_day": spirit.current_day, "advanced": True}
+
+
 @app.post("/api/config/players")
 def add_player(req: PlayerIn):
     player_id = _slugify(req.name)
@@ -340,6 +385,37 @@ def delete_spirit(spirit_id: str):
     del game_config.spirits[spirit_id]
     game_config.save()
     return {"status": "deleted"}
+
+
+# ── Conversation logging ──────────────────────────────────────────────────────
+
+def _save_conversation():
+    """Write the current session's conversation to a timestamped log file."""
+    if not session.player or not session.spirit:
+        return
+    logs_dir = Path("logs")
+    logs_dir.mkdir(exist_ok=True)
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = logs_dir / f"{timestamp}_{session.player.name}.txt"
+    lines = [
+        f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        f"Player: {session.player.name}",
+        f"Spirit: {session.spirit.name}",
+        f"Milestone: {session.current_milestone}",
+        "",
+    ]
+    history = session.conversation_history
+    i = 0
+    while i < len(history):
+        msg = history[i]
+        if msg["role"] == "user" and not msg["content"].startswith("[SYSTEM NOTIFICATION"):
+            lines.append(f"Player: {msg['content']}")
+            if i + 1 < len(history) and history[i + 1]["role"] == "assistant":
+                lines.append(f"Spirit: {history[i + 1]['content']}")
+                i += 2
+                continue
+        i += 1
+    filename.write_text("\n".join(lines), encoding="utf-8")
 
 
 # ── Static frontend ───────────────────────────────────────────────────────────

@@ -8,6 +8,11 @@ players:
     spirit: spirit_alaric
     gender: férfi
     age: 18-20
+    # Unique words used for voice-based player identification
+    keywords:
+      - Erindel
+      - harcos
+      - bosszú
 
 # Globális lore
 common_lore:
@@ -67,6 +72,7 @@ spirits:
   spirit_alaric:
     name: "Alaric"
     listen_seconds: 10
+    current_day: 0
     # A szellem személyiségét és hátterét meghatározó rendszerprompt
     system_prompt: |
       Te Alaric vagy, egy régen elhunyt ős ősi szelleme. Évszázadok óta őrködöl a vérvonalad felett.
