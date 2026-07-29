@@ -1,12 +1,18 @@
-- Add player gender and age to config
-- Add multiple spirit voices
-- Try local LLM
+- Initialization by voodoo
+    - altar should be in idle state as long as a given checker function ```def wake_up_altar -> bool``` returns False
+    - When it returns True (for testing, it should check whether space is pressed), the altar should wake up, and start the process of identifying the player
+    - Player identification consists of listening to the microphone using ```record_vad_window```, and transcribing the resulting sound file using whisper. 
+    - Each player has a sentence that has a number of words unique to that sentence. These words should be stored among the player data.
+    - The transcribed text should be checked against these unique words and the player with the most matches should be chosen. The spirit of the given player should then be summoned.
 - Realize conversation caching and loading
-- Convert milestone counter to locally edit-able global days counter
-- NFT integration
-~~Microphone listening time fix~~
+    - During each conversation, record the conversation in textual format. Date, player who conversed, and the transcript of the discussion. This is for archival reasons, as the Game Master wants to be able to read the conversation after it happened.
+- Milestones should should progress each day as we assume that players will complete one milestone per day. It should still be manually edit-able per spirit.
 - Limit conversation length & end conversation when it matured
-~~System prompt edit-time yaml syncing~~
-- Stage directions and special words fix?
+- Add multiple spirit voices
+- Add player gender and age to config
 - Add hums and whatnot for end of recording
-- Optional: add full system prompt generation after edit
+- Pronounciation dictionary
+~~Try local LLM~~
+~~Microphone listening time fix~~
+~~System prompt edit-time yaml syncing~~
+~~Optional: add full system prompt generation after edit~~
