@@ -119,7 +119,7 @@ class GameConfig:
                 listen_seconds=sdata.get("listen_seconds", 10),
                 current_day=sdata.get("current_day", 0),
                 voice_name=sdata.get("voice_name", ""),
-                max_exchanges=sdata.get("max_exchanges", 20),
+                max_exchanges=sdata.get("max_exchanges", 15),
             )
 
     def resolve_voice_id(self, spirit: "Spirit") -> str:

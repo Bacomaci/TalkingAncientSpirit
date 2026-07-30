@@ -1,18 +1,29 @@
-- Initialization by voodoo
-    - altar should be in idle state as long as a given checker function ```def wake_up_altar -> bool``` returns False
-    - When it returns True (for testing, it should check whether space is pressed), the altar should wake up, and start the process of identifying the player
-    - Player identification consists of listening to the microphone using ```record_vad_window```, and transcribing the resulting sound file using whisper. 
-    - Each player has a sentence that has a number of words unique to that sentence. These words should be stored among the player data.
-    - The transcribed text should be checked against these unique words and the player with the most matches should be chosen. The spirit of the given player should then be summoned.
-- Realize conversation caching and loading
-    - During each conversation, record the conversation in textual format. Date, player who conversed, and the transcript of the discussion. This is for archival reasons, as the Game Master wants to be able to read the conversation after it happened.
-- Milestones should should progress each day as we assume that players will complete one milestone per day. It should still be manually edit-able per spirit.
-- Conversation length per summoning should be limited to 20 back-and-forth or until conversation has matured. Towards the end, the spirit should express weariness about continuing the conversation. At the end it should give a reason for ending it. The system should also realize when the player wants to end the conversation and do so then.
-- There should be multiple voice ids to choose from. There are male and female, weary and energetic spirits.
-- Player characters also have a gender and an age. This is important for how spirits address them. This should be added to the player edit and config.
+1. The common_lore backstory in the config file is removed when yaml is UI-edited.
+2. First greeting plays with environment voice id. It should play with the spirit's voice id!
+3. Farewell patterns are an unreliable way to recognize whether the player wants to end the session. The agent should recognize if the player wants to do so and say some conventional greeting, eg "Menj, ha menned kell!". This should end the session.
+- Music/ambience for summoning, recording, speaking and end of session
 - Add hums and whatnot for end of recording
 - Pronounciation dictionary
+- Make Őskirály lore detailed and clear
+- Milestones should should progress each day as we assume that players will complete one milestone per day. It should still be manually edit-able per spirit.
+
+## FINISHED ##
+~~- Conversation length per summoning should be limited to 20 back-and-forth or until conversation has matured. Towards the end, the spirit should express weariness about continuing the conversation. At the end it should give a reason for ending it. The system should also realize when the player wants to end the conversation and do so then.~~
+~~- Make spirits curious~~
+~~- Remove stage directions~~
+~~- Write spirits and death lore~~
+~~- Clear lore bloat~~
+~~- There should be multiple voice ids to choose from. There are male and female, weary and energetic spirits.~~
+~~- Player characters also have a gender and an age. This is important for how spirits address them. This should be added to the player edit and config.~~
 ~~Try local LLM~~
 ~~Microphone listening time fix~~
 ~~System prompt edit-time yaml syncing~~
 ~~Optional: add full system prompt generation after edit~~
+~~- Initialization by voodoo~~
+    ~~- altar should be in idle state as long as a given checker function ```def wake_up_altar -> bool``` returns False~~
+    ~~- When it returns True (for testing, it should check whether space is pressed), the altar should wake up, and start the process of identifying the player~~
+    ~~- Player identification consists of listening to the microphone using ```record_vad_window```, and transcribing the resulting sound file using whisper.~~ 
+    ~~- Each player has a sentence that has a number of words unique to that sentence. These words should be stored among the player data.~~
+    ~~- The transcribed text should be checked against these unique words and the player with the most matches should be chosen. The spirit of the given player should then be summoned.~~
+~~- Realize conversation caching and loading~~
+~~- During each conversation, record the conversation in textual format. Date, player who conversed, and the transcript of the discussion. This is for archival reasons, as the Game Master wants to be able to read the conversation after it happened.~~

@@ -106,7 +106,7 @@ def start_session(req: StartSessionRequest):
     else:
         opening_display, opening_tts = get_spirit_response(
             session,
-            f"[The player {player.name} has just placed the bone on the altar and summoned you. Greet them.]",
+            f"[A játékos {player.name} most idézett meg téged egy hosszú rituáléval. Üdvözöld!]",
             _llm_client,
             SPIRIT_LANGUAGE,
         )
@@ -212,13 +212,16 @@ async def speak(file: UploadFile = File(...)):
     if not player_text:
         raise HTTPException(422, "Could not transcribe audio")
 
+    spirit = session.spirit
+    assert spirit is not None
+
     try:
         reply_display, reply_tts = get_spirit_response(session, player_text, _llm_client, SPIRIT_LANGUAGE)
     except Exception as e:
         raise HTTPException(500, f"LLM error: {e}") from e
 
     try:
-        audio = synthesize_speech(reply_tts, game_config.resolve_voice_id(session.spirit) or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
+        audio = synthesize_speech(reply_tts, game_config.resolve_voice_id(spirit) or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
     except Exception as e:
         raise HTTPException(500, f"TTS error: {e}") from e
 
@@ -226,7 +229,7 @@ async def speak(file: UploadFile = File(...)):
 
     # Determine whether the session should end after this reply
     farewell = player_wants_to_leave(player_text)
-    limit_reached = session.exchange_count >= session.spirit.max_exchanges
+    limit_reached = session.exchange_count >= spirit.max_exchanges
     end_session_now = farewell or limit_reached
 
     if end_session_now:

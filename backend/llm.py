@@ -5,7 +5,7 @@ import re
 import anthropic
 from .game_state import SessionState
 
-MAX_EXCHANGES = 20  # fallback default, overridden per spirit via config
+MAX_EXCHANGES = 12  # fallback default, overridden per spirit via config
 # Farewell words the player might use to end the conversation (Hungarian + English)
 _FAREWELL_PATTERNS = re.compile(
     r'\b(viszlát|isten veled|isten hozzád|búcsúzom|elmegyek|mennem kell|goodbye|farewell|i must go|i have to go)\b',
@@ -42,7 +42,8 @@ def build_dynamic_context_message(state: SessionState) -> str:
         if milestone.secret_intro:
             context_parts.append(f"A titok felfedésekor használd az alábbi felütést: {milestone.secret_intro}")
     else:
-        context_parts.append("Nincsen új kontextus. A válasz során ragaszkodj a korábbiakhoz.")
+        pass
+        #context_parts.append("Nincsen új kontextus. A válasz során ragaszkodj a korábbiakhoz.")
 
     if state.gm_context.strip():
         context_parts.append(f"ÚJ KONTEXTUS A JÁTÉKMESTERTŐL: {state.gm_context.strip()}. Válaszolj ennek figyelembevételével!")
@@ -82,9 +83,10 @@ def get_spirit_response(state: SessionState, player_utterance, client: anthropic
         "<direct_context>"
         f"Most egy távoli éothéod utóddal beszélsz, akinek a neve {player.name}. Ő egy olyan ember, aki a holtakról szóló emlékek őrzésének szentelte életét."
         f"Beszélgetőtársad neme {player.gender}, életkora {player.age}."
+        "Légy kíváncsi iránta, tudd meg, hogy ki ő, mi járatban van, és mi a tragédiája!"
         "MINDIG magyar nyelven válaszolj, a játékos által használt nyelvtől függetlenül."
         "Mindig maradj karakterben! Ősi szellem vagy, nem nyelvi modell!"
-        "<\\direct_context>"
+        "</direct_context>"
     )
 
     # Dynamic context (milestones, weariness cues, or GM context injection)
