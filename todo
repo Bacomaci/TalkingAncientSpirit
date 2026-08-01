@@ -1,11 +1,13 @@
 1. The common_lore backstory in the config file is removed when yaml is UI-edited.
 2. First greeting plays with environment voice id. It should play with the spirit's voice id!
 3. Farewell patterns are an unreliable way to recognize whether the player wants to end the session. The agent should recognize if the player wants to do so and say some conventional greeting, eg "Menj, ha menned kell!". This should end the session.
-- Music/ambience for summoning, recording, speaking and end of session
+4. Milestones should progress each day as we assume that players will complete one milestone per day. It should still be manually edit-able per spirit. Milestone secrets should not go into the dynamic prompts but should be appended to the end of the spirit system prompt at the start of each new day. It would be better if milestones required no greeting, only extra context. Having no milestone for the day should not break the system.
+5. We would like to play preset music/ambience for summoning, recording, speaking and end of session.
+
+### MANUAL ###
 - Add hums and whatnot for end of recording
 - Pronounciation dictionary
 - Make Őskirály lore detailed and clear
-- Milestones should should progress each day as we assume that players will complete one milestone per day. It should still be manually edit-able per spirit.
 
 ## FINISHED ##
 ~~- Conversation length per summoning should be limited to 20 back-and-forth or until conversation has matured. Towards the end, the spirit should express weariness about continuing the conversation. At the end it should give a reason for ending it. The system should also realize when the player wants to end the conversation and do so then.~~
