@@ -111,7 +111,7 @@ def start_session(req: StartSessionRequest):
             SPIRIT_LANGUAGE,
         )
 
-    audio = synthesize_speech(opening_tts, ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
+    audio = synthesize_speech(opening_tts, game_config.resolve_voice_id(spirit) or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
     audio_b64 = base64.b64encode(audio).decode()
 
     session.greeting = opening_display

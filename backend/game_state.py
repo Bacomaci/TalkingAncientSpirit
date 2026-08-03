@@ -95,6 +95,7 @@ class GameConfig:
 
         self.voices: dict[str, str] = data.get("voices", {})  # name -> ElevenLabs voice ID
         common_lore = data.get("common_lore", "")
+        self.common_lore: str = common_lore
 
         self.spirits: dict[str, Spirit] = {}
         for sid, sdata in data.get("spirits", {}).items():
@@ -158,7 +159,7 @@ class GameConfig:
                     for m in s.milestones
                 ],
             }
-        return {"voices": self.voices, "players": players_list, "spirits": spirits_dict}
+        return {"voices": self.voices, "players": players_list, "spirits": spirits_dict, "common_lore": self.common_lore}
 
     def save(self):
         with open(self._config_path, "w", encoding="utf-8") as f:
