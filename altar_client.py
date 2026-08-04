@@ -13,6 +13,8 @@ import httpx
 import sounddevice as sd
 import soundfile as sf
 import numpy as np
+from scipy.signal import butter, lfilter
+import aubio
 from dotenv import load_dotenv
 
 import collections
@@ -26,6 +28,10 @@ MIN_LISTEN_SECONDS = 5
 MAX_LISTEN_SECONDS = 25
 SILENCE_TIMEOUT = 1.5
 CHANNELS = 1
+
+# Idle altar settings
+BUFFER_SIZE = 512
+HOP_SIZE = 256
 
 # Drain pause after playback so the mic doesn't catch speaker echo
 PLAYBACK_DRAIN_SECONDS = 0.5
@@ -173,7 +179,7 @@ def audio_to_wav_bytes(audio: np.ndarray) -> bytes:
     return buf.getvalue()
 
 
-def wake_up_altar() -> bool:
+def wake_up_altar_with_spacebar() -> bool:
     """Return True when the altar should wake up and start player identification.
     In testing mode this triggers on spacebar press; replace with real sensor logic for production.
     """
@@ -189,6 +195,132 @@ def wake_up_altar() -> bool:
                 sys.stdin.read(1)
                 return True
     return False
+
+def butter_highpass(cutoff=800, fs=SAMPLE_RATE, order=4):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='high', analog=False) # type: ignore
+    return b, a
+
+HP_B, HP_A = butter_highpass(cutoff=800, fs=SAMPLE_RATE)
+
+def apply_highpass_filter(data):
+    """Filters deep sounds and human speech"""
+    return lfilter(HP_B, HP_A, data)
+
+def wake_up_altar() -> bool:
+    """
+    Listens to the microphone and returns True for the required tap pattern (tá-tá-ti-ti-tá).
+    """
+
+    # Target rhythm
+    target_ratios = np.array([1.0, 1.0, 0.5, 0.5], dtype=np.float32)
+    target_pattern = target_ratios / np.sum(target_ratios)
+
+    # Number of knocks needed
+    NUM_INTERVALS = len(target_pattern)
+    REQUIRED_TAP_COUNT = NUM_INTERVALS + 1
+
+    # Euclidean vector tolerance for rhythm matching
+    TOLERANCE = 0.06
+    
+    # Debounce (minimal time between knocks)
+    MIN_INTER_TAP_TIME = 0.12  # 120 ms
+    
+    # Rhythm resets at this timeout value
+    TIMEOUT_SECONDS = 2.0
+
+    BASE_THRESHOLD = 0.25      # Minimum threshold in silence
+    NOISE_MULTIPLIER = 12.0    # Multiply RMS by this to get threshold
+
+    # Initialize onset detector. "specdiff" algorithm good for sharp transients
+    aubio_onset = aubio.onset("specdiff", BUFFER_SIZE, HOP_SIZE, SAMPLE_RATE) # type: ignore
+    aubio_onset.set_threshold(0.3)
+
+    noise_history = collections.deque(maxlen=60)
+    tap_timestamps = collections.deque(maxlen=REQUIRED_TAP_COUNT)
+    
+    is_pattern_matched = False
+
+    # Callback function (this runs at each window)
+    def audio_callback(indata, frames, time_info, status):
+        nonlocal is_pattern_matched, tap_timestamps
+        
+        if is_pattern_matched:
+            return
+
+        # Convert sounddevice chunk to numpy array for aubio
+        raw_chunk = indata[:, 0].astype(np.float32)
+
+        # Filter input noise
+        filtered_chunk = apply_highpass_filter(raw_chunk)
+        filtered_chunk = np.ascontiguousarray(filtered_chunk, dtype=np.float32)
+
+        # Compute dynamic RMS
+        rms_energy = float(np.sqrt(np.mean(filtered_chunk ** 2)))
+        noise_history.append(rms_energy)
+        avg_noise = np.mean(noise_history) if len(noise_history) > 0 else 0.001
+
+        # Scale threshold dynamically
+        dynamic_threshold = BASE_THRESHOLD + (avg_noise * NOISE_MULTIPLIER)
+        aubio_onset.set_threshold(min(dynamic_threshold, 2.0))
+
+        # Aubio detects onset
+        if aubio_onset(filtered_chunk):
+            now = time.time()
+            
+            # Clean buffer if rhythm timed out
+            if len(tap_timestamps) > 0 and (now - tap_timestamps[-1]) > TIMEOUT_SECONDS:
+                tap_timestamps.clear()
+
+            # Filter debounce cases
+            if len(tap_timestamps) == 0 or (now - tap_timestamps[-1]) >= MIN_INTER_TAP_TIME:
+                tap_timestamps.append(now)
+                print(f" [Tap detected! Number of taps: {len(tap_timestamps)}/{REQUIRED_TAP_COUNT}]")
+
+                # When required number of taps is reached, pattern is matched
+                if len(tap_timestamps) == REQUIRED_TAP_COUNT:
+                    timestamps = np.array(tap_timestamps)
+                    
+                    # Inter-Onset Intervals
+                    intervals = np.diff(timestamps)
+                    total_duration = np.sum(intervals)
+
+                    if total_duration > 0:
+                        # Normalize intervals to achieve tempo independence
+                        measured_pattern = intervals / total_duration
+
+                        # Compute euclidean distance
+                        euclidean_distance = np.linalg.norm(measured_pattern - target_pattern)
+                        
+                        print(f" [Rhythm analysis: euclidean distance = {euclidean_distance:.4f} (Tolerance: {TOLERANCE})]")
+
+                        if euclidean_distance <= TOLERANCE:
+                            print(" [Ritual succesful. Altar activated!]")
+                            is_pattern_matched = True
+                        else:
+                            print(" [Wrong rhythm. Try again!]")
+                            # Slide buffer, bin first tap
+                            tap_timestamps.popleft()
+
+    # Start microphone stream
+    try:
+        with sd.InputStream(
+            channels=1,
+            samplerate=SAMPLE_RATE,
+            blocksize=HOP_SIZE,
+            dtype="float32",
+            callback=audio_callback
+        ):
+            # Stream runs until pattern matching
+            while not is_pattern_matched:
+                time.sleep(0.01)
+
+    except Exception as e:
+        print(f" [Microphone stream error: {e}]")
+        return False
+
+    return is_pattern_matched
 
 
 def identify_player(client: httpx.Client) -> str | None:
