@@ -51,24 +51,9 @@ spirits:
     current_day: 0
     voice_name: Old german male
     max_exchanges: 4
+    player_notes: ''
     milestones:
-    - id: 0
-      name: Első megidézés
-      greeting: 'Ah... megtaláltad az oltárt, gyermekem. Jól van. Régóta várok arra,
-        hogy felkeress.
-
-        Kérdezz, amit akarsz — de ne pazarold az időmet ostobasággal.'
-      secret: null
     - id: 1
-      name: Az első próbatétel után
-      secret: 'Az, aki szövetségesednek nevezi magát, egy jelet visel a bal karja
-        alatt —
-
-        az Üres Udvar bélyegét. Ne bízz a tanácsában, amikor felkel a hold.'
-      secret_intro: 'Bizonyítottad magad az első próbatételen. Akkor elárulhatom,
-        amit eddig
-
-        titokban tartottam előled, a te védelmed érdekében...'
     - id: 2
       name: Az utolsó szembesítés előtt
       secret: 'Az igazi kapu nem a vasajtó, amit majd mutatni fognak neked. A régi
@@ -77,9 +62,6 @@ spirits:
         tűzhelyköve alatt — az oltártól három lépésre északra — ott van az átjáró.
 
         Én magam rejtettem el, háromszáz évvel ezelőtt.'
-      secret_intro: 'A vég közeledik. Látom a sors szálain. Figyelj rám, gyermekem,
-
-        mert lehet, hogy nem lesz erőm újra szólni...'
   spirit_2:
     name: Leofric
     system_prompt: 'Te Leofric vagy, egy régen elhunyt éothéod felderítő és erdőjáró
@@ -107,13 +89,10 @@ spirits:
     current_day: 0
     voice_name: Old male
     max_exchanges: 20
+    player_notes:
     milestones:
     - id: 0
       name: Első megidézés
-      greeting: 'Ah... megtaláltad az oltárt, gyermekem. Jól van. Régóta várok arra,
-        hogy felkeress.
-
-        Kérdezz, amit akarsz — de ne pazarold az időmet ostobasággal.'
       secret: null
 common_lore: '<generic_system_prompt> Te egy éothéod voltál valamikor, hosszú évszázadokkal
   ezelőtt. Halálod után lelked nem tudott megtérni az ősök csarnokába, szellemed a

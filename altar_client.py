@@ -20,13 +20,6 @@ from dotenv import load_dotenv
 import collections
 import webrtcvad
 
-try:
-    import pygame
-    pygame.mixer.init()
-    _PYGAME_AVAILABLE = True
-except Exception:
-    _PYGAME_AVAILABLE = False
-
 load_dotenv()
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
@@ -42,69 +35,6 @@ HOP_SIZE = 256
 
 # Drain pause after playback so the mic doesn't catch speaker echo
 PLAYBACK_DRAIN_SECONDS = 0.5
-
-# Ambient audio tracks — drop MP3 files into the audio/ folder with these names
-AUDIO_DIR = os.path.join(os.path.dirname(__file__), "audio")
-AMBIENT_TRACKS = {
-    "idle":       "idle.mp3",
-    "summoning":  "summoning.mp3",
-    "recording":  "recording.mp3",
-    "speaking":   "speaking.mp3",
-}
-
-
-def play_ambient(track: str):
-    """Start looping an ambient track. Silently skips if pygame or the file is unavailable."""
-    if not _PYGAME_AVAILABLE:
-        return
-    path = os.path.join(AUDIO_DIR, AMBIENT_TRACKS.get(track, ""))
-    if not os.path.isfile(path):
-        return
-    try:
-        pygame.mixer.music.load(path)
-        pygame.mixer.music.play(-1)  # -1 = loop forever
-    except Exception:
-        pass
-
-
-def stop_ambient():
-    """Stop any currently playing ambient track."""
-    if not _PYGAME_AVAILABLE:
-        return
-    try:
-        pygame.mixer.music.stop()
-    except Exception:
-        pass
-
-
-def record_fixed_window(duration_seconds: int) -> np.ndarray:
-    """Record a fixed-length audio window from the microphone."""
-    print(f"  [Listening for {duration_seconds}s...]")
-    total_samples = SAMPLE_RATE * duration_seconds
-    chunk_size = int(SAMPLE_RATE * 0.1)  # 100ms chunks
-    chunks = []
-    peak_rms = 0.0
-
-    with sd.InputStream(samplerate=SAMPLE_RATE, channels=CHANNELS, dtype="float32") as stream:
-        samples_recorded = 0
-        chunk_index = 0
-        while samples_recorded < total_samples:
-            data, _ = stream.read(chunk_size)
-            chunks.append(data.copy())
-            samples_recorded += len(data)
-            rms = float(np.sqrt(np.mean(data ** 2)))
-            if rms > peak_rms:
-                peak_rms = rms
-            if chunk_index % 10 == 0:
-                elapsed = samples_recorded / SAMPLE_RATE
-                remaining = duration_seconds - elapsed
-                bar = "#" * int(rms * 500)
-                print(f"  [mic rms={rms:.4f} peak={peak_rms:.4f} remaining={remaining:.0f}s] {bar}")
-            chunk_index += 1
-
-    audio = np.concatenate(chunks, axis=0)
-    print(f"  [Recording done — {len(audio)/SAMPLE_RATE:.1f}s, peak rms={peak_rms:.4f}]")
-    return audio
 
 def record_vad_window(max_duration_seconds: int, min_duration_seconds: int = 6, silence_timeout:float = 1.5) -> tuple[np.ndarray, bool]:
     """
@@ -369,7 +299,7 @@ def identify_player(client: httpx.Client) -> str | None:
     print("\n  [Identifying player — please speak your name and allegiance...]\n")
     audio, spoke = record_vad_window(
         max_duration_seconds=MAX_LISTEN_SECONDS,
-        min_duration_seconds=14,
+        min_duration_seconds=10,
         silence_timeout=SILENCE_TIMEOUT,
     )
     if not spoke:
@@ -399,7 +329,6 @@ def run_conversation_loop():
         while True:
 
             print(f"  [Your turn — speak when ready (min {MIN_LISTEN_SECONDS}s, max {MAX_LISTEN_SECONDS}s)]")
-            play_ambient("recording")
             audio, spoke = record_vad_window(max_duration_seconds=MAX_LISTEN_SECONDS, min_duration_seconds=MIN_LISTEN_SECONDS, silence_timeout=SILENCE_TIMEOUT)
 
             if not spoke:
@@ -409,12 +338,10 @@ def run_conversation_loop():
                     if resp.status_code == 200:
                         data = resp.json()
                         print(f"  [Spirit]: {data['spirit_said']}\n")
-                        play_ambient("speaking")
                         mp3 = base64.b64decode(data["audio_base64"])
                         play_audio_mp3(mp3)
                 except Exception as e:
                     print(f"  [Abandon error: {e}]")
-                stop_ambient()
                 break
 
             wav_bytes = audio_to_wav_bytes(audio)
@@ -427,7 +354,6 @@ def run_conversation_loop():
                 )
                 if resp.status_code == 400:
                     print("  [No active session]")
-                    stop_ambient()
                     break
                 if resp.status_code == 422:
                     print("  [Nothing understood — please try again]")
@@ -436,12 +362,10 @@ def run_conversation_loop():
                 data = resp.json()
                 print(f"  [You said]: {data['player_said']}")
                 print(f"  [Spirit]:   {data['spirit_said']}\n")
-                play_ambient("speaking")
                 mp3 = base64.b64decode(data["audio_base64"])
                 play_audio_mp3(mp3)
                 if data.get("session_ended"):
                     print("  [Session ended by spirit]\n")
-                    stop_ambient()
                     break
             except httpx.HTTPStatusError as e:
                 print(f"  [Backend error {e.response.status_code}: {e.response.text}]")
@@ -472,12 +396,10 @@ def autonomous_wake_and_identify() -> str | None:
     Returns a player_id on success, None if identification fails (caller should retry).
     """
     print("  [Altar idle — waiting for wake trigger (press SPACE to wake)...]")
-    play_ambient("idle")
     while not wake_up_altar():
         time.sleep(0.1)
 
     print("  [Altar awake!]")
-    play_ambient("summoning")
     with httpx.Client(base_url=BACKEND_URL, timeout=30.0) as client:
         player_id = identify_player(client)
         if player_id is None:
@@ -503,7 +425,6 @@ def fetch_and_play_greeting(client: httpx.Client):
             if resp.status_code == 200:
                 data = resp.json()
                 print(f"\n  [Spirit]: {data['greeting']}\n")
-                play_ambient("speaking")
                 mp3 = base64.b64decode(data["audio_base64"])
                 play_audio_mp3(mp3)
                 return

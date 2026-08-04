@@ -9,7 +9,7 @@ MAX_EXCHANGES = 12  # fallback default, overridden per spirit via config
 
 _FAREWELL_SENTINEL = "menj békével"
 
-_NOTES_MAX_CHARS = 400
+_NOTES_MAX_CHARS = 4000
 
 
 def summarize_session(history: list, player_name: str, existing_notes: str, client: anthropic.Anthropic) -> str:
@@ -37,7 +37,7 @@ def summarize_session(history: list, player_name: str, existing_notes: str, clie
         f"{transcript}\n\n"
         "In 1-2 sentences, summarize only concrete facts the spirit learned about this player "
         "(their background, goals, relationships, secrets revealed). "
-        "Be very brief. Write in third person, past tense, in Hungarian. "
+        "Be very brief. Write in third person, present tense, in Hungarian. Only mention facts, no context."
         "If nothing meaningful was learned, reply with an empty string."
     )
 

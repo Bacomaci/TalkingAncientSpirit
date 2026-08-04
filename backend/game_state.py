@@ -66,9 +66,6 @@ def _build_full_system_prompt(common_lore: str, system_prompt: str, milestones: 
     if active:
         parts.append("\n\n<accumulated_knowledge>")
         for m in active:
-            parts.append(f"\n<!-- {m.name} -->")
-            if m.secret_intro:
-                parts.append(f"\n{m.secret_intro}")
             parts.append(f"\n{m.secret}")
         parts.append("\n</accumulated_knowledge>")
     if player_notes:
