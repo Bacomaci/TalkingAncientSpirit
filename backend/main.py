@@ -143,7 +143,7 @@ async def abandon_session():
     except Exception as e:
         raise HTTPException(500, f"LLM error: {e}") from e
     try:
-        audio = synthesize_speech(reply_tts, game_config.resolve_voice_id(session.spirit) or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
+        audio = synthesize_speech(reply_tts, game_config.resolve_voice_id(session.spirit) or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE) # type: ignore
     except Exception as e:
         raise HTTPException(500, f"TTS error: {e}") from e
 
@@ -366,7 +366,6 @@ def add_spirit(req: SpiritIn):
         Milestone(
             id=i,
             name=m.name,
-            greeting=m.greeting or None,
             secret=m.secret or None,
             secret_intro=m.secret_intro or None,
         )
@@ -392,7 +391,6 @@ def update_spirit(spirit_id: str, req: SpiritIn):
         Milestone(
             id=i,
             name=m.name,
-            greeting=m.greeting or None,
             secret=m.secret or None,
             secret_intro=m.secret_intro or None,
         )
@@ -438,7 +436,6 @@ def _save_conversation():
         f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         f"Player: {session.player.name}",
         f"Spirit: {session.spirit.name}",
-        f"Milestone: {session.current_milestone}",
         "",
     ]
     history = session.conversation_history

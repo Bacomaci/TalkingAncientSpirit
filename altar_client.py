@@ -24,7 +24,7 @@ load_dotenv()
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 SAMPLE_RATE = 16000 # DO NOT CHANGE (this is one of the few numbers that whisper and WebRTC can bot handle!)
-MIN_LISTEN_SECONDS = 5
+MIN_LISTEN_SECONDS = 7
 MAX_LISTEN_SECONDS = 25
 SILENCE_TIMEOUT = 1.5
 CHANNELS = 1
@@ -329,7 +329,7 @@ def identify_player(client: httpx.Client) -> str | None:
     print("\n  [Identifying player — please speak your name and allegiance...]\n")
     audio, spoke = record_vad_window(
         max_duration_seconds=MAX_LISTEN_SECONDS,
-        min_duration_seconds=5,
+        min_duration_seconds=14,
         silence_timeout=SILENCE_TIMEOUT,
     )
     if not spoke:
