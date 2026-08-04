@@ -14,14 +14,13 @@ class Milestone:
     name: str
     secret: Optional[str]
     secret_intro: Optional[str] = None
-    greeting: Optional[str] = None
 
 
 @dataclass
 class Spirit:
     name: str
     system_prompt: str
-    full_system_prompt:str
+    full_system_prompt: str  # common_lore + personality + milestones up to current_day
     milestones: list[Milestone]
     listen_seconds: int = 10
     current_day: int = 0
@@ -43,29 +42,12 @@ class Player:
 class SessionState:
     player: Optional[Player] = None
     spirit: Optional[Spirit] = None
-    current_milestone: int = 0
     session_active: bool = False
-    gm_context: str = ""          # Extra context injected by GM
+    gm_context: str = ""
     conversation_history: list = field(default_factory=list)
     greeting: Optional[str] = None
     greeting_audio_b64: Optional[str] = None
-    exchange_count: int = 0       # Number of completed player→spirit exchanges
-
-    def current_milestone_obj(self) -> Optional[Milestone]:
-        if self.spirit is None:
-            return None
-        milestones = self.spirit.milestones
-        idx = min(self.current_milestone, len(milestones) - 1)
-        return milestones[idx]
-
-    def advance_milestone(self) -> bool:
-        """Returns True if there was a next milestone to advance to."""
-        if self.spirit is None:
-            return False
-        if self.current_milestone < len(self.spirit.milestones) - 1:
-            self.current_milestone += 1
-            return True
-        return False
+    exchange_count: int = 0
 
     def reset_conversation(self):
         self.conversation_history = []
@@ -74,6 +56,21 @@ class SessionState:
 
 def _slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9_]", "_", name.lower().strip())
+
+
+def _build_full_system_prompt(common_lore: str, system_prompt: str, milestones: list[Milestone], current_day: int) -> str:
+    """Build the full static system prompt: common lore + personality + all milestone secrets up to current_day."""
+    parts = [common_lore, "\n\n<your_personality>\n" + system_prompt + "\n</your_personality>"]
+    active = [m for m in milestones if m.id <= current_day and m.secret]
+    if active:
+        parts.append("\n\n<accumulated_knowledge>")
+        for m in active:
+            parts.append(f"\n<!-- {m.name} -->")
+            if m.secret_intro:
+                parts.append(f"\n{m.secret_intro}")
+            parts.append(f"\n{m.secret}")
+        parts.append("\n</accumulated_knowledge>")
+    return "".join(parts)
 
 
 class GameConfig:
@@ -93,9 +90,8 @@ class GameConfig:
                 keywords=p.get("keywords", []),
             )
 
-        self.voices: dict[str, str] = data.get("voices", {})  # name -> ElevenLabs voice ID
-        common_lore = data.get("common_lore", "")
-        self.common_lore: str = common_lore
+        self.voices: dict[str, str] = data.get("voices", {})
+        self.common_lore: str = data.get("common_lore", "")
 
         self.spirits: dict[str, Spirit] = {}
         for sid, sdata in data.get("spirits", {}).items():
@@ -103,28 +99,27 @@ class GameConfig:
                 Milestone(
                     id=m["id"],
                     name=m["name"],
-                    secret=m.get("secret"),
-                    secret_intro=m.get("secret_intro"),
-                    greeting=m.get("greeting"),
+                    secret=m.get("secret") or None,
+                    secret_intro=m.get("secret_intro") or None,
                 )
                 for m in sdata.get("milestones", [])
             ]
-
-            full_system_prompt = common_lore + "\n\n<your_personality>\n" + sdata["system_prompt"] + "\n<\\your_personality>"
-
+            current_day = sdata.get("current_day", 0)
+            full_system_prompt = _build_full_system_prompt(
+                self.common_lore, sdata["system_prompt"], milestones, current_day
+            )
             self.spirits[sid] = Spirit(
                 name=sdata["name"],
-                system_prompt = sdata["system_prompt"],
+                system_prompt=sdata["system_prompt"],
                 full_system_prompt=full_system_prompt,
                 milestones=milestones,
                 listen_seconds=sdata.get("listen_seconds", 10),
-                current_day=sdata.get("current_day", 0),
+                current_day=current_day,
                 voice_name=sdata.get("voice_name", ""),
                 max_exchanges=sdata.get("max_exchanges", 15),
             )
 
     def resolve_voice_id(self, spirit: "Spirit") -> str:
-        """Return the ElevenLabs voice ID for a spirit, or empty string if not found."""
         return self.voices.get(spirit.voice_name, "")
 
     def get_player(self, player_id: str) -> Optional[Player]:
@@ -134,7 +129,6 @@ class GameConfig:
         return self.spirits.get(player.spirit_id)
 
     def to_dict(self) -> dict:
-        """Serialize config back to the YAML-compatible dict structure."""
         players_list = [
             {"id": p.id, "name": p.name, "spirit": p.spirit_id, "gender": p.gender, "age": p.age, "keywords": p.keywords}
             for p in self.players.values()
@@ -152,7 +146,6 @@ class GameConfig:
                     {
                         "id": m.id,
                         "name": m.name,
-                        **({"greeting": m.greeting} if m.greeting else {}),
                         **({"secret": m.secret} if m.secret else {"secret": None}),
                         **({"secret_intro": m.secret_intro} if m.secret_intro else {}),
                     }

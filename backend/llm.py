@@ -29,18 +29,7 @@ def build_dynamic_context_message(state: SessionState) -> str:
     Builds a dynamic context string containing game status that changes over time.
     This goes into the messages list to keep the main system prompt strictly static and cacheable.
     """
-    milestone = state.current_milestone_obj()
     context_parts = ["<current_game_status>"]
-
-    if milestone and milestone.secret:
-        context_parts.append(
-            f"A beszélgetés keretein belül fedd fel az alábbi titkot. Ne tedd azonnal egyértelművé, légy természetes: {milestone.secret}"
-        )
-        if milestone.secret_intro:
-            context_parts.append(f"A titok felfedésekor használd az alábbi felütést: {milestone.secret_intro}")
-    else:
-        pass
-        #context_parts.append("Nincsen új kontextus. A válasz során ragaszkodj a korábbiakhoz.")
 
     if state.gm_context.strip():
         context_parts.append(f"ÚJ KONTEXTUS A JÁTÉKMESTERTŐL: {state.gm_context.strip()}. Válaszolj ennek figyelembevételével!")

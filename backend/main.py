@@ -13,7 +13,7 @@ from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from .game_state import GameConfig, SessionState, _slugify
+from .game_state import GameConfig, SessionState, _slugify, _build_full_system_prompt
 from .llm import get_spirit_response, spirit_said_farewell
 from .stt import transcribe_audio
 from .tts import synthesize_speech
@@ -56,17 +56,11 @@ class StartSessionRequest(BaseModel):
 class UpdateContextRequest(BaseModel):
     gm_context: str
 
-class AdvanceMilestoneResponse(BaseModel):
-    success: bool
-    new_milestone: int
-    milestone_name: str
-
 class SessionStatus(BaseModel):
     active: bool
     player_name: str | None
     spirit_name: str | None
-    current_milestone: int
-    milestone_name: str | None
+    current_day: int
     gm_context: str
     listen_seconds: int
 
@@ -93,23 +87,15 @@ def start_session(req: StartSessionRequest):
     session.player = player
     session.spirit = spirit
     session.session_active = True
-    session.current_milestone = min(spirit.current_day, len(spirit.milestones) - 1)
     session.reset_conversation()
 
-    # Generate opening greeting using the spirit
-    milestone = session.current_milestone_obj()
-    greeting_seed = milestone.greeting if milestone and milestone.greeting else None
-
-    if greeting_seed:
-        opening_display = greeting_seed
-        opening_tts = greeting_seed
-    else:
-        opening_display, opening_tts = get_spirit_response(
-            session,
-            f"[A játékos {player.name} most idézett meg téged egy hosszú rituáléval. Üdvözöld!]",
-            _llm_client,
-            SPIRIT_LANGUAGE,
-        )
+    # Generate opening greeting
+    opening_display, opening_tts = get_spirit_response(
+        session,
+        f"[A játékos {player.name} most idézett meg téged egy hosszú rituáléval. Üdvözöld!]",
+        _llm_client,
+        SPIRIT_LANGUAGE,
+    )
 
     audio = synthesize_speech(opening_tts, game_config.resolve_voice_id(spirit) or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
     audio_b64 = base64.b64encode(audio).decode()
@@ -142,19 +128,6 @@ def end_session():
     return {"status": "ended"}
 
 
-@app.post("/api/session/advance_milestone", response_model=AdvanceMilestoneResponse)
-def advance_milestone():
-    if not session.session_active:
-        raise HTTPException(400, "No active session")
-    success = session.advance_milestone()
-    m = session.current_milestone_obj()
-    return AdvanceMilestoneResponse(
-        success=success,
-        new_milestone=session.current_milestone,
-        milestone_name=m.name if m else "unknown",
-    )
-
-
 @app.post("/api/session/context")
 def update_context(req: UpdateContextRequest):
     session.gm_context = req.gm_context
@@ -163,13 +136,11 @@ def update_context(req: UpdateContextRequest):
 
 @app.get("/api/session/status", response_model=SessionStatus)
 def get_status():
-    m = session.current_milestone_obj()
     return SessionStatus(
         active=session.session_active,
         player_name=session.player.name if session.player else None,
         spirit_name=session.spirit.name if session.spirit else None,
-        current_milestone=session.current_milestone,
-        milestone_name=m.name if m else None,
+        current_day=session.spirit.current_day if session.spirit else 0,
         gm_context=session.gm_context,
         listen_seconds=session.spirit.listen_seconds if session.spirit else 10,
     )
@@ -310,16 +281,28 @@ def get_config():
 
 @app.post("/api/config/spirits/{spirit_id}/advance_day")
 def advance_day(spirit_id: str):
-    """Increment the day counter for a spirit, advancing its default milestone."""
+    """Increment the day counter for a spirit and rebuild its system prompt."""
     if spirit_id not in game_config.spirits:
         raise HTTPException(404, "Spirit not found")
     spirit = game_config.spirits[spirit_id]
-    max_day = len(spirit.milestones) - 1
-    if spirit.current_day >= max_day:
-        return {"current_day": spirit.current_day, "advanced": False, "message": "Already at final milestone"}
     spirit.current_day += 1
+    spirit.full_system_prompt = _build_full_system_prompt(
+        game_config.common_lore, spirit.system_prompt, spirit.milestones, spirit.current_day
+    )
     game_config.save()
     return {"current_day": spirit.current_day, "advanced": True}
+
+
+@app.post("/api/config/advance_day_all")
+def advance_day_all():
+    """Increment the day counter for all spirits at once (call once per new game day)."""
+    for spirit in game_config.spirits.values():
+        spirit.current_day += 1
+        spirit.full_system_prompt = _build_full_system_prompt(
+            game_config.common_lore, spirit.system_prompt, spirit.milestones, spirit.current_day
+        )
+    game_config.save()
+    return {sid: s.current_day for sid, s in game_config.spirits.items()}
 
 
 @app.post("/api/config/players")
