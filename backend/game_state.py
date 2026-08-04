@@ -26,6 +26,7 @@ class Spirit:
     current_day: int = 0
     voice_name: str = ""
     max_exchanges: int = 20
+    player_notes: str = ""
 
 
 @dataclass
@@ -58,8 +59,8 @@ def _slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9_]", "_", name.lower().strip())
 
 
-def _build_full_system_prompt(common_lore: str, system_prompt: str, milestones: list[Milestone], current_day: int) -> str:
-    """Build the full static system prompt: common lore + personality + all milestone secrets up to current_day."""
+def _build_full_system_prompt(common_lore: str, system_prompt: str, milestones: list[Milestone], current_day: int, player_notes: str = "") -> str:
+    """Build the full static system prompt: common lore + personality + all milestone secrets up to current_day + player memory."""
     parts = [common_lore, "\n\n<your_personality>\n" + system_prompt + "\n</your_personality>"]
     active = [m for m in milestones if m.id <= current_day and m.secret]
     if active:
@@ -70,6 +71,8 @@ def _build_full_system_prompt(common_lore: str, system_prompt: str, milestones: 
                 parts.append(f"\n{m.secret_intro}")
             parts.append(f"\n{m.secret}")
         parts.append("\n</accumulated_knowledge>")
+    if player_notes:
+        parts.append(f"\n\n<player_memory>\n{player_notes}\n</player_memory>")
     return "".join(parts)
 
 
@@ -105,8 +108,9 @@ class GameConfig:
                 for m in sdata.get("milestones", [])
             ]
             current_day = sdata.get("current_day", 0)
+            player_notes = sdata.get("player_notes", "")
             full_system_prompt = _build_full_system_prompt(
-                self.common_lore, sdata["system_prompt"], milestones, current_day
+                self.common_lore, sdata["system_prompt"], milestones, current_day, player_notes
             )
             self.spirits[sid] = Spirit(
                 name=sdata["name"],
@@ -117,6 +121,7 @@ class GameConfig:
                 current_day=current_day,
                 voice_name=sdata.get("voice_name", ""),
                 max_exchanges=sdata.get("max_exchanges", 15),
+                player_notes=player_notes,
             )
 
     def resolve_voice_id(self, spirit: "Spirit") -> str:
@@ -142,6 +147,7 @@ class GameConfig:
                 "current_day": s.current_day,
                 "voice_name": s.voice_name,
                 "max_exchanges": s.max_exchanges,
+                "player_notes": s.player_notes,
                 "milestones": [
                     {
                         "id": m.id,

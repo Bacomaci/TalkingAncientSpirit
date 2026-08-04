@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from .game_state import GameConfig, SessionState, _slugify, _build_full_system_prompt
-from .llm import get_spirit_response, spirit_said_farewell
+from .llm import get_spirit_response, spirit_said_farewell, summarize_session
 from .stt import transcribe_audio
 from .tts import synthesize_speech
 
@@ -122,7 +122,7 @@ def get_greeting():
 @app.post("/api/session/end")
 def end_session():
     if session.session_active and session.conversation_history:
-        _save_conversation()
+        _finalize_session()
     session.session_active = False
     session.reset_conversation()
     return {"status": "ended"}
@@ -149,7 +149,7 @@ async def abandon_session():
 
     await _broadcast({"type": "transcript", "player_said": "[elhagyta az oltárt]", "spirit_said": reply_display})
 
-    _save_conversation()
+    _finalize_session()
     session.session_active = False
     session.reset_conversation()
 
@@ -235,7 +235,7 @@ async def speak(file: UploadFile = File(...)):
     end_session_now = farewell or limit_reached
 
     if end_session_now:
-        _save_conversation()
+        _finalize_session()
         session.session_active = False
         session.reset_conversation()
 
@@ -318,7 +318,7 @@ def advance_day(spirit_id: str):
     spirit = game_config.spirits[spirit_id]
     spirit.current_day += 1
     spirit.full_system_prompt = _build_full_system_prompt(
-        game_config.common_lore, spirit.system_prompt, spirit.milestones, spirit.current_day
+        game_config.common_lore, spirit.system_prompt, spirit.milestones, spirit.current_day, spirit.player_notes
     )
     game_config.save()
     return {"current_day": spirit.current_day, "advanced": True}
@@ -330,7 +330,7 @@ def advance_day_all():
     for spirit in game_config.spirits.values():
         spirit.current_day += 1
         spirit.full_system_prompt = _build_full_system_prompt(
-            game_config.common_lore, spirit.system_prompt, spirit.milestones, spirit.current_day
+            game_config.common_lore, spirit.system_prompt, spirit.milestones, spirit.current_day, spirit.player_notes
         )
     game_config.save()
     return {sid: s.current_day for sid, s in game_config.spirits.items()}
@@ -450,6 +450,23 @@ def _save_conversation():
                 continue
         i += 1
     filename.write_text("\n".join(lines), encoding="utf-8")
+
+
+def _finalize_session():
+    """Summarize what the spirit learned, persist to config, then save the conversation log."""
+    if not session.player or not session.spirit:
+        return
+    spirit = session.spirit
+    updated_notes = summarize_session(
+        session.conversation_history, session.player.name, spirit.player_notes, _llm_client
+    )
+    if updated_notes != spirit.player_notes:
+        spirit.player_notes = updated_notes
+        spirit.full_system_prompt = _build_full_system_prompt(
+            game_config.common_lore, spirit.system_prompt, spirit.milestones, spirit.current_day, spirit.player_notes
+        )
+        game_config.save()
+    _save_conversation()
 
 
 # ── Static frontend ───────────────────────────────────────────────────────────
