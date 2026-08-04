@@ -66,10 +66,11 @@ def record_fixed_window(duration_seconds: int) -> np.ndarray:
     print(f"  [Recording done — {len(audio)/SAMPLE_RATE:.1f}s, peak rms={peak_rms:.4f}]")
     return audio
 
-def record_vad_window(max_duration_seconds: int, min_duration_seconds: int = 6, silence_timeout:float = 1.5) -> np.ndarray:
+def record_vad_window(max_duration_seconds: int, min_duration_seconds: int = 6, silence_timeout:float = 1.5) -> tuple[np.ndarray, bool]:
     """
-    Record audio for at least min_duration_seconds. Recording stops automatically when 
+    Record audio for at least min_duration_seconds. Recording stops automatically when
     player stays silent for silence_timeout. Records for a maximum of max_duration_seconds.
+    Returns (audio, spoke) where spoke is False if no speech was detected at all.
     """
     # Initialize WebRTC VAD (with filter mode 2 or 3 recommended in a LARP setting) 
     vad = webrtcvad.Vad()
@@ -152,7 +153,7 @@ def record_vad_window(max_duration_seconds: int, min_duration_seconds: int = 6, 
 
     audio = np.concatenate(chunks, axis=0)
     print(f"  [Recording done — total length: {len(audio)/SAMPLE_RATE:.1f}s]")
-    return audio
+    return audio, has_spoken
 
 def play_audio_mp3(mp3_bytes: bytes):
     """Play MP3 bytes through the speaker, then drain."""
@@ -326,11 +327,14 @@ def wake_up_altar() -> bool:
 def identify_player(client: httpx.Client) -> str | None:
     """Listen for player introduction, send to backend for keyword matching, return player_id."""
     print("\n  [Identifying player — please speak your name and allegiance...]\n")
-    audio = record_vad_window(
+    audio, spoke = record_vad_window(
         max_duration_seconds=MAX_LISTEN_SECONDS,
         min_duration_seconds=5,
         silence_timeout=SILENCE_TIMEOUT,
     )
+    if not spoke:
+        print("  [No speech detected during identification]")
+        return None
     wav_bytes = audio_to_wav_bytes(audio)
     try:
         resp = client.post("/api/identify", files={"file": ("audio.wav", wav_bytes, "audio/wav")})
@@ -355,8 +359,21 @@ def run_conversation_loop():
         while True:
 
             print(f"  [Your turn — speak when ready (min {MIN_LISTEN_SECONDS}s, max {MAX_LISTEN_SECONDS}s)]")
-            audio = record_vad_window(max_duration_seconds=MAX_LISTEN_SECONDS, min_duration_seconds=MIN_LISTEN_SECONDS, silence_timeout=SILENCE_TIMEOUT)
-            
+            audio, spoke = record_vad_window(max_duration_seconds=MAX_LISTEN_SECONDS, min_duration_seconds=MIN_LISTEN_SECONDS, silence_timeout=SILENCE_TIMEOUT)
+
+            if not spoke:
+                print("  [No speech detected — player may have left. Triggering farewell...]")
+                try:
+                    resp = client.post("/api/session/abandon")
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        print(f"  [Spirit]: {data['spirit_said']}\n")
+                        mp3 = base64.b64decode(data["audio_base64"])
+                        play_audio_mp3(mp3)
+                except Exception as e:
+                    print(f"  [Abandon error: {e}]")
+                break
+
             wav_bytes = audio_to_wav_bytes(audio)
             print(f"  [Sending {len(wav_bytes)} bytes to backend...]")
 

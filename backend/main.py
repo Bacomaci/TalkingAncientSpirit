@@ -128,6 +128,37 @@ def end_session():
     return {"status": "ended"}
 
 
+@app.post("/api/session/abandon")
+async def abandon_session():
+    """Player walked away — spirit gives a short farewell and session ends."""
+    if not session.session_active:
+        raise HTTPException(400, "No active session")
+    try:
+        reply_display, reply_tts = get_spirit_response(
+            session,
+            "[A játékos szó nélkül eltávozott az oltártól. Mondj egy rövid, méltóságteljes búcsút.]",
+            _llm_client,
+            SPIRIT_LANGUAGE,
+        )
+    except Exception as e:
+        raise HTTPException(500, f"LLM error: {e}") from e
+    try:
+        audio = synthesize_speech(reply_tts, game_config.resolve_voice_id(session.spirit) or ELEVENLABS_VOICE_ID, ELEVENLABS_API_KEY, TTS_LANGUAGE_CODE)
+    except Exception as e:
+        raise HTTPException(500, f"TTS error: {e}") from e
+
+    await _broadcast({"type": "transcript", "player_said": "[elhagyta az oltárt]", "spirit_said": reply_display})
+
+    _save_conversation()
+    session.session_active = False
+    session.reset_conversation()
+
+    return {
+        "spirit_said": reply_display,
+        "audio_base64": base64.b64encode(audio).decode(),
+    }
+
+
 @app.post("/api/session/context")
 def update_context(req: UpdateContextRequest):
     session.gm_context = req.gm_context
