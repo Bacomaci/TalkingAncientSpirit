@@ -6,11 +6,12 @@ import anthropic
 from .game_state import SessionState
 
 MAX_EXCHANGES = 12  # fallback default, overridden per spirit via config
-# Farewell words the player might use to end the conversation (Hungarian + English)
-_FAREWELL_PATTERNS = re.compile(
-    r'\b(viszlát|isten veled|isten hozzád|búcsúzom|elmegyek|mennem kell|goodbye|farewell|i must go|i have to go)\b',
-    re.IGNORECASE
-)
+
+_FAREWELL_SENTINEL = "menj békével"
+
+
+def spirit_said_farewell(reply_text: str) -> bool:
+    return _FAREWELL_SENTINEL in reply_text.lower()
 
 
 def reformat_stage_directions(text: str) -> str:
@@ -21,10 +22,6 @@ def reformat_stage_directions(text: str) -> str:
 def strip_stage_directions(text: str) -> str:
     """Remove [stage directions] entirely — used before sending text to TTS."""
     return re.sub(r'\[[^\]]+\]', '', text).strip()
-
-
-def player_wants_to_leave(text: str) -> bool:
-    return bool(_FAREWELL_PATTERNS.search(text))
 
 
 def build_dynamic_context_message(state: SessionState) -> str:
@@ -86,6 +83,7 @@ def get_spirit_response(state: SessionState, player_utterance, client: anthropic
         "Légy kíváncsi iránta, tudd meg, hogy ki ő, mi járatban van, és mi a tragédiája!"
         "MINDIG magyar nyelven válaszolj, a játékos által használt nyelvtől függetlenül."
         "Mindig maradj karakterben! Ősi szellem vagy, nem nyelvi modell!"
+        "Ha a játékos el akar búcsúzni, vagy ha természetes módon lezárult a beszélgetés, mondj egy méltóságteljes búcsút, és zárd a mondandódat a következő szavakkal: \"menj békével\". Ez jelzi a rendszernek, hogy véget ért a találkozó."
         "</direct_context>"
     )
 
