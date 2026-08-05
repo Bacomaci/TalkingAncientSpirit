@@ -64,7 +64,7 @@ Edit `.env` and fill in:
 
 ### 3. Configure the game
 
-Start the server (step 4), then open **`http://localhost:8000/setup.html`** in a browser. From there you can:
+Start the server (step 5), then open **`http://localhost:8000/setup.html`** in a browser. From there you can:
 
 - Create spirits — name, personality, milestones, secrets, and per-spirit listening window duration
 - Add players and assign each one a spirit
