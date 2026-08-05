@@ -27,8 +27,10 @@ One spirit per player — each player's ancestor has its own personality, backst
 
 ### 1. Install dependencies
 
+Imstall anaconda (the miniconda-3 version suffices). In anaconda prompt:
+
 ```bash
-pip install -r requirements.txt
+conda env create -f [PATH_TO_LOCAL_REPO]\environment.yml
 ```
 
 > `faster-whisper` downloads the Whisper model on first run (`tiny` ~75 MB, `base` ~150 MB).
@@ -46,12 +48,15 @@ Edit `.env` and fill in:
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Claude API key | [console.anthropic.com](https://console.anthropic.com) |
 | `ELEVENLABS_API_KEY` | ElevenLabs API key | elevenlabs.io → Profile |
-| `ELEVENLABS_VOICE_ID` | Voice to use for the spirit | ElevenLabs → Voices → click a voice → ID in the URL |
+| `ELEVENLABS_VOICE_ID` | Fallback voice id to use for spirits | ElevenLabs → Voices → click a voice → ID in the URL |
+| `HF_TOKEN` | Huggingface API token for downloading large whisper models | — |
 | `WHISPER_MODEL` | STT model size: `tiny` / `base` / `small` / `medium` / `large-v2` | — |
 | `WHISPER_LANGUAGE` | STT language code (e.g. `hu`, `en`, `de`) | — |
 | `SPIRIT_LANGUAGE` | Language the spirit responds in (e.g. `Hungarian`) | — |
 | `TTS_LANGUAGE_CODE` | TTS accent/pronunciation code (e.g. `hu`, `en`) | — |
 | `LISTEN_SECONDS` | Default mic listening window in seconds (default: `10`) | — |
+| `AUDIO_INPUT_DEVICE` | Default audio input device index | python: ```print sounddevices.query_devices()``` |
+| `AUDIO_OUTPUT_DEVICE` | Default audio uotput device index | python: ```print sounddevices.query_devices()``` |
 
 > **Note:** `TTS_LANGUAGE_CODE` requires the `eleven_turbo_v2_5` model (used by default). `eleven_multilingual_v2` does not support explicit language codes.
 
@@ -66,18 +71,30 @@ Start the server (step 4), then open **`http://localhost:8000/setup.html`** in a
 
 No YAML editing needed. Changes save immediately.
 
-### 4. Start the backend
+### 4. Activate conda
+
+In anaconda prompt:
+
+```bash
+conda activate dradskolpa-env-311
+```
+
+### 5. Start the backend
+
+Inside the environment (or using conda as interpreter in VS Code):
 
 ```bash
 cd TalkingAncientSpirit
 uvicorn run:app --host 0.0.0.0 --port 8000
 ```
 
-### 5. Open the GM console
+### 6. Open the GM console
 
 Navigate to **`http://localhost:8000`** in any browser (works on a phone or tablet on the same WiFi).
 
-### 6. Start the altar client
+### 7. Start the altar client
+
+Inside the environment (or using conda as interpreter in VS Code):
 
 ```bash
 python altar_client.py
@@ -89,19 +106,21 @@ The altar client waits until the GM starts a session, then plays the greeting an
 
 Yes. Run the backend and altar client in two separate terminal windows on the same PC, and open the GM console in a browser on the same machine.
 
-## GM workflow
+## Optional GM workflow
 
 | Step | Action |
 |---|---|
 | Before the event | Open Setup page, create spirits and players |
 | Player approaches altar | Select player, click **Szellem megidézése** |
 | During conversation | Watch the live transcript, inject context as needed |
-| Player reaches a story moment | Click **Következő mérföldkőre lépés** — the spirit reveals the next secret naturally |
-| Player leaves | Click **Munkamenet befejezése** |
 
-## Listening window
+## Conjuring spirits
 
-The altar client records a fixed-length audio window after each spirit response rather than using silence detection. The duration defaults to `LISTEN_SECONDS` (env) and can be overridden per spirit with `listen_seconds` in `game_config.yaml` or the Setup UI. Adjust it to match your players' speaking pace.
+The altar is always in idle state and listening to the microphone when no spirit is conjured. When a player taps the correct sequence with their stick (tá-tá-ti-ti-tá), the altar enters player identification. The player needs to say their secret sentence out loud, identifying themselves. The altar recognizes the player and summons the spirit. In case any of the parts fail or the player abandons, the altar returns to idle.
+
+## Spririt conversation workflow
+
+The altar records a clip that is at least `MIN_LISTEN_SECONDS` (default = 7), at most `MAX_LISTEN_SECONDS` (default = 25) long, and normally ends when the player has not spoken for at least `SILENCE_TIMEOUT` (default = 1.5) seconds. The clip is transcribed by whisper locally. A prompt is edited afterwards. It has two components: a large static component comprising of all global knowledge and spirit knowledge, and a small dynamic component containing GM context and the last 10 exchanges. This prompt is sent to Claude, which answers as if it was the spirit. This answer is then regex formatted and sent to elevenlabs, which transforms it TTS. This audio file is then played back.
 
 ## File overview
 
@@ -112,7 +131,7 @@ The altar client records a fixed-length audio window after each spirit response 
 | `backend/llm.py` | Claude prompt construction and response |
 | `backend/stt.py` | faster-whisper transcription |
 | `backend/tts.py` | ElevenLabs voice synthesis |
-| `altar_client.py` | Altar PC client — mic recording and audio playback |
+| `altar_client.py` | Altar PC client — summoning, mic recording and audio playback |
 | `config/game_config.yaml` | Game content (auto-updated by the Setup UI) |
 | `frontend/static/index.html` | GM console — session control and live transcript |
 | `frontend/static/setup.html` | Game setup — spirits, milestones, players |
@@ -120,6 +139,5 @@ The altar client records a fixed-length audio window after each spirit response 
 ## Tuning
 
 - **ElevenLabs voice** — `stability`, `similarity_boost`, `style` in `backend/tts.py`
-- **Listening window** — `LISTEN_SECONDS` in `.env` or `listen_seconds` per spirit in the Setup UI
 - **Whisper model size** — set `WHISPER_MODEL` in `.env`; larger = more accurate, slower
 - **VAD filter** — enabled by default in `backend/stt.py`; skips silent segments for faster transcription

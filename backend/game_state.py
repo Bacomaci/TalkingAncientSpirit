@@ -11,8 +11,8 @@ import re
 @dataclass
 class Milestone:
     id: int
-    name: str
-    secret: Optional[str]
+    name: Optional[str] = None
+    secret: Optional[str] = None
     secret_intro: Optional[str] = None
 
 
@@ -66,7 +66,8 @@ def _build_full_system_prompt(common_lore: str, system_prompt: str, milestones: 
     if active:
         parts.append("\n\n<accumulated_knowledge>")
         for m in active:
-            parts.append(f"\n{m.secret}")
+            if m.secret:
+                parts.append(f"\n{m.secret}")
         parts.append("\n</accumulated_knowledge>")
     if player_notes:
         parts.append(f"\n\n<player_memory>\n{player_notes}\n</player_memory>")
@@ -95,15 +96,18 @@ class GameConfig:
 
         self.spirits: dict[str, Spirit] = {}
         for sid, sdata in data.get("spirits", {}).items():
-            milestones = [
-                Milestone(
-                    id=m["id"],
-                    name=m["name"],
-                    secret=m.get("secret") or None,
-                    secret_intro=m.get("secret_intro") or None,
-                )
-                for m in sdata.get("milestones", [])
-            ]
+            if sdata.get("milestones"):
+                milestones = [
+                    Milestone(
+                        id=m["id"],
+                        name=m.get("name") or None,
+                        secret=m.get("secret") or None,
+                        secret_intro=m.get("secret_intro") or None,
+                    )
+                    for m in sdata.get("milestones", [])
+                ]
+            else:
+                milestones = [Milestone(0)]
             current_day = sdata.get("current_day", 0)
             player_notes = sdata.get("player_notes", "")
             full_system_prompt = _build_full_system_prompt(
