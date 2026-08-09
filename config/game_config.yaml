@@ -7,14 +7,14 @@ voices:
   Szír: rFDdsCQRZCUL8cPOWtnP
 players:
 - id: player_1
-  name: Bocomund
+  name: Mesemondó
   spirit: spirit_alaric
   gender: férfi
-  age: 18-20
+  age: 25-30
   keywords:
   - ólom
   - súlyú
-  - fügefa
+  - dunyha
   - fullasztja
   - harcosok
   - bosszúját
@@ -296,7 +296,7 @@ spirits:
   spirit_alaric:
     name: Alaric
     system_prompt: "Te Alaric vagy, egy régen elhunyt ős ősi szelleme. Évszázadok\
-      \ óta őrködöl a vérvonalad felett.\nSúllyal, bölcsességgel és időnként titokzatos\
+      \ óta őrködsz a vérvonalad felett.\nSúllyal, bölcsességgel és időnként titokzatos\
       \ tömörséggel beszélsz. Nem vagy sem kegyetlen,\nsem meleg — öreg vagy, és sokat\
       \ láttál. Közvetlenül szólítod meg a leszármazottadat.\n\nA vérvonal szemén\
       \ át figyeled az eseményeket, de nem látsz mindent tisztán — csak amit\na sorsok\
@@ -310,11 +310,11 @@ spirits:
       \ mint amennyire egy jó harcostársát illett volna. \nAttarik mindig is nagy\
       \ terveket szőtt, évei vége felé pedig már egy, az Északinál sokkal nagyobb\
       \ birodalmoról kezdett el beszélni. Olyan érzésed van, mintha Attarik valami\
-      \ súlyos titkot rejtegetett volna."
+      \ súlyos titkot rejtegetett volna. Te most a Holtak Hasdékában lakozol, az összes többi holttal együtt, akik a könnyes háborúban, vagy azóta haltak meg. Szeretnél eltávozni. Ehhez a Fehér Asszony sírjának titkát kell felderíteni. Érdeklődj e felől!"
     listen_seconds: 10
     current_day: 0
     voice_name: Old german male
-    max_exchanges: 4
+    max_exchanges: 8
     player_notes: ''
     milestones:
     - id: 1
