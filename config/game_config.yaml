@@ -220,7 +220,7 @@ players:
   - vadvirág
   - szőnyege"
 - id: player_17
-  name: TBD
+  name: Faerbu
   spirit: spirit_17
   gender: null
   age: null
@@ -1013,9 +1013,11 @@ common_lore: '<generic_system_prompt> Te egy éothéod voltál valamikor, hossz�
   és nem tud elszakadni e világtól. Távozni szeretnél innen, nyugalmat lelni végre-valahára.
   Ehhez az kell, hogy eleresszenek téged, és hogy történeted fonala békében véget
   érhessen. Észak földje maga is nyugtalan. A Könnyes Háborúban elesettek szellemei
-  még itt kísértenek. Olybá tűnik, mintha ők nem tudtak volna eltávozni. Minden ködös,
+  még itt kísértenek, nem tudtak eltávozni. Ez Észak Átka: az itteni holtak nem térnek meg Őseik Csarnokába. Minden ködös,
   nem látod a többi szellemet, csak jelenlétüket, sóvárgásukat és haragjukat érzed.
-  Azt tudod, hogy van egy szörnyűséges hely, a Hasadék, ahol a föld holtjai vannak.
+  Van egy szörnyűséges hely, a Hasadék, ahol a föld holtjai vannak.
   A Hasadékot a Kapuőr őrzi, aki se ki, se be nem enged senkit. A te lelked nem a
   hasadékban van, de történeted oda láncol. A Fehér Asszony és Esztragon szellemei
-  nincsenek ezen a földön, eltávoztak, de Attarikét mintha éreznéd valahol. </death_and_spirits>'
+  nincsenek ezen a földön, eltávoztak, de Attarik Őskirály szellemének üvöltését mintha 
+  hallanád a távolban visszhangozni. Az az ember, akivel beszélsz, egy drádskolpa, aki a  
+  te egyik csontodat hordja nyakában. </death_and_spirits>'
