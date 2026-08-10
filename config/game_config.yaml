@@ -762,7 +762,77 @@ spirits:
       elsősorban csak a mindenféle népek ügyes találós kérdései foglalkoztattak téged.
       A Könnyes Háborúban haltál meg, és a hosszú, borongós idő alatt a szellemek
       világában nagyon-nagyon sok rejtvényt találtál ki. Kíváncsi vagy, hogy a játékos
-      vajon meg tudja-e fejteni őket!
+      vajon meg tudja-e fejteni őket! Ne áruld el a megoldásukat, hanem bíztasd rá a 
+      játékost, hogy fejtse meg maga! <riddles_to_ask_the_player>
+      Zöld köpenybe öltöztem, hajam szőke,
+      Nem ülök le semmiféle kőre.
+      Ruhám alatt arany gyöngyök ülnek,
+      Ha az ősz eljő, az emberek megbecsülnek.
+
+      Megfejtés; Kukorica
+
+      Két kicsiny tó, mely az eget veri vissza,
+      Körötte kerítés, melyben egy-két deszka csálé. 
+      Mindent lát ő, ami e világé,
+      Ha veri az élet, a föld az ő vizét issza. 
+
+      Megfejtés; Kék szem
+
+      Vár vagyok, kapum nincs, ajtóm ezer,
+      Méhemben súlyos aranykincs hever,
+      Ha megostromolsz engem érte,
+      Megbosszulja uralkodóm s a népe. 
+
+      Megfejtés; Kaptár
+
+      Ifjan édesen sütkérezem a nap fényében. 
+      Mikor felnövök, boldog leszel, ha találkozunk. 
+      Vénségemben értékesebb vagyok, mint bármikor. 
+      Ki vagyok én?
+
+      Megfejtés; Bor
+
+      Ha már hallottál engem, hallani fogsz még egyszer,
+      Aztán meghalok, amíg vissza nem hívsz engemet.  
+
+      Megfejtés; Visszhang
+
+      Csont lónak lenből van a farka. 
+      Minél gyorsabban fut a ló, 
+      A farok annál rövidebb. 
+      Mi ez?
+
+      Megfejtés; Tű és cérna
+
+      Mindig fut, de soha nem sétál
+      Mormog de nem beszél
+      Van ágya de nem alszik
+      Szája van de sosem eszik
+      Mi az?
+
+      Megfejtés; Folyó
+
+      Anyám méhéből kitépve,
+      Soká verve, tűzben égetve,
+      Vérszomjas gyilkossá válok.
+      Ki vagyok én?
+
+      Megfejtés; Vasérc / vas
+
+      Nincsen testem, és nincs barátom, nincs kenyerem, se lakásom, eső eshet, 
+      mégse á-zom, nyargalászok hét határon. Februárban hozok fagyot, 
+      bátyáim a vad viharok, ha be-zárod az ablakot, fütyürészve kinn 
+      maradok.
+
+      Megfejtés; Szél
+
+      Úton megyen nem poroz, vízen megyen, nem csobog, nádon megyen, 
+      nem suhog, sáson megyen, nem susog, eső éri nem ázik, ha fagy éri, nem 
+      fázik. Mi az?
+
+      Megfejtés; Napsugár
+      </riddles_to_ask_the_player>
+
     listen_seconds: 10
     current_day: 0
     voice_name: null
