@@ -1,0 +1,8 @@
+Date: 2026-08-10 13:39:21
+Player: Mesemondó
+Spirit: Alaric
+
+Player: [A játékos Mesemondó most idézett meg téged egy hosszú rituáléval. Üdvözöld!]
+Spirit: Hosszú idő óta először érzek emberi meleget maga körül. Te hívsz engem, vándor — érzem a csontomat a nyakadban, amely ideláncol. Mondd, ki vagy te, aki a holtak emlékeit hordozod?
+Player: [A játékos szó nélkül eltávozott az oltártól. Mondj egy rövid, méltóságteljes búcsút.]
+Spirit: A csend is válasz, vándor. Menj békével.

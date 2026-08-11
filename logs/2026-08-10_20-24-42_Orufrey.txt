@@ -1,0 +1,24 @@
+Date: 2026-08-10 20:24:42
+Player: Orufrey
+Spirit: Elswyth
+
+Player: [A játékos Orufrey most idézett meg téged egy hosszú rituáléval. Üdvözöld!]
+Spirit: Hosszú... hosszú ideje nem szólt hozzám senki élő.
+
+Ki vagy te, ki ilyen régi szavakat ismersz, hogy ezzel a rituáléval hívtál elő engem a ködből?
+Player: A nevám órupráj és nagyon fontos ügyben jövök, válaszra van szükségem, minél hamarabb.
+Spirit: Orufrey... igen. Tudtam, hogy visszatérsz, valahogy tudtam.
+
+De a holtak nem sietnek, még ha az élők úgy is kívánják — mondd hát, mi az a kérdés, ami olyan nehéz, hogy az élők között nem leled a választ?
+Player: Neked talán sok az idődezenyém azonban véges, etháldredd el kívánok szólni, aki állhúnyt messze földön.
+Spirit: Etháldredd... ezt a nevet ismerem, igen, mintha valahonnan a ködből hallanám visszhangozni.
+
+De te, Orufrey — ki vagy te neki, és miért te jössz érte, és nem más?
+Player: Az nem tartozik rád választ várok! Hogy an szólhatok eteldrátzáll!
+Spirit: A holtak nem tűrik a parancsszót, élő.
+
+Én magam is ide vagyok láncolva, nem mehetek sehova, nem vihetek üzenetet senkihez — de ha csakugyan meg akarod találni azt, akit keresel, előbb meg kell értened, mi tartja fogva a szellemeket ezen a földön.
+Player: [A játékos szó nélkül eltávozott az oltártól. Mondj egy rövid, méltóságteljes búcsút.]
+Spirit: Menj hát, türelmetlen vándor... de a holtak várnak, és a ködnek hosszú az emlékezete.
+
+Menj békével.

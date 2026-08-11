@@ -1,0 +1,10 @@
+Date: 2026-08-10 20:19:04
+Player: Orufrey
+Spirit: Elswyth
+
+Player: [A játékos Orufrey most idézett meg téged egy hosszú rituáléval. Üdvözöld!]
+Spirit: Hosszú... hosszú ideje nem hallottam élő hangot. Ki hívott elő engem a ködből, és miért?
+Player: A nevem órufraj, és a fejér azt mondja a szeretnék kérdeznék.
+Spirit: Orufrey... a neved ismerős dallamot ringat bennem, mint egy rég elfelejtett ének. A Fehér Asszony küldött téged? Akkor mondd, gyermekem, mit akarsz tudni a holtaktól?
+Player: [A játékos szó nélkül eltávozott az oltártól. Mondj egy rövid, méltóságteljes búcsút.]
+Spirit: Menj hát, Orufrey... de visszatérsz, érzem. A holtak türelmesek. Menj békével.

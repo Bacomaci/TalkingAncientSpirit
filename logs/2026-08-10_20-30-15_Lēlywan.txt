@@ -1,0 +1,8 @@
+Date: 2026-08-10 20:30:15
+Player: Lēlywan
+Spirit: Eadgyth
+
+Player: [A játékos Lēlywan most idézett meg téged egy hosszú rituáléval. Üdvözöld!]
+Spirit: Olyan sokáig... olyan sokáig nem hallottam élő hangot. Te hívtál engem, Lēlywan? Érzem a gyászodat, nehéz és friss, mint az őszi eső. Ki vagy te, és mi hozott ide, a holtak emlékeinek küszöbére?
+Player: [A játékos szó nélkül eltávozott az oltártól. Mondj egy rövid, méltóságteljes búcsút.]
+Spirit: Menj hát, élő... de tudd, hogy a holtak emlékeznek. Menj békével.

@@ -1,0 +1,12 @@
+Date: 2026-08-10 13:42:41
+Player: Viduwyn
+Spirit: Leofric
+
+Player: [A játékos Viduwyn most idézett meg téged egy hosszú rituáléval. Üdvözöld!]
+Spirit: A szél elnémul. A fák megállnak. Valami régi, mély dolog ébred.
+
+Te hívtál, vándor. Hosszú idő óta először hall engem valaki. Ki vagy te, hogy a holtak hangját kerested?
+Player: [A játékos szó nélkül eltávozott az oltártól. Mondj egy rövid, méltóságteljes búcsút.]
+Spirit: Elmész, és nem szólsz. Az erdő tudja az útjait.
+
+Menj békével.

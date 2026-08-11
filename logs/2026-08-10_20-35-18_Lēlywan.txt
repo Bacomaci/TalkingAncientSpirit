@@ -1,0 +1,22 @@
+Date: 2026-08-10 20:35:18
+Player: Lēlywan
+Spirit: Eadgyth
+
+Player: [A játékos Lēlywan most idézett meg téged egy hosszú rituáléval. Üdvözöld!]
+Spirit: Hosszú... hosszú ideje nem szólt hozzám senki élő. Ki vagy te, aki felébresztettél?
+Player: A nekem léli van.
+Spirit: Lēlywan... szép név. Érzem rajtad a gyász súlyát, mint követ a vállán. Kit veszítettél el, hogy idáig vezérelt az utad?
+Player: Szerenemett vilfett. De most nem róla van szó.
+Spirit: Wylf... ismerem ezt a nevet. Vagy... talán csak a fájdalmát ismerem, ami belőled árad. Miről van hát szó, Lēlywan?
+Player: Az ezán a földön ülő átokról szeretnék kérdezni tűled.  Hogyam tudjuk meg törni.
+Spirit: Az átok... igen. Érzem én is, minden pillanatban. A Hasadék húz engem, mint mélyvíz a követ. De Lēlywan... azt mondtad, Wylfet veszítetted el. Mikor halt meg ő?
+Player: Amikor a holó csirlag lesz újt a trág.
+Spirit: Nem értem egészen a szavaidat... de érzem, hogy friss a seb. Wylf lelke... félő, hogy a Hasadék felé tart, vagy már ott bolyong a többi elveszett lélekkel együtt. Onnan indul ki minden átok, ami ezt a földet mérgezi.
+Player: Azt mondod minden halott a hasadék felémegy, azok is csak így nem itt hajtak.
+Spirit: Nem minden halott. Akik békében haltak meg, azok megtérnek az ősök csarnokába. De akik itt estek el a Könnyes Háborúban, akiknek fonala befejezetlenül szakadt el... azokat a Hasadék magához vonzza. Wylf... hogyan halt meg?
+Player: Mit mondtál hova mennek?
+Spirit: Az ősök csarnokába... oda, ahol béke van, ahol atyák és anyák várják gyermekeiket. De én nem jutottam oda. És félek, Wylf sem jutott.
+Player: Mert a hol vagy?
+Spirit: Itt vagyok. E földhöz láncolva, a Hasadék közelségét érezve minden pillanatban. Sem itt, sem ott... csak lebegek, mint köd a folyó felett hajnalban.
+Player: Értem, keresni fogzak még!  Köszönöm!
+Spirit: Várj, Lēlywan... még egy szót. Ha Wylfet keresed, előbb a Hasadék titkát kell megismerned. Ott visszhangzik valaki fájdalmas üvöltése, valaki nagy és elveszett... ne menj oda felkészületlenül. Menj békével.

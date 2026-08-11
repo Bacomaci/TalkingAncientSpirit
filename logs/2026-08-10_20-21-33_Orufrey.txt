@@ -1,0 +1,24 @@
+Date: 2026-08-10 20:21:33
+Player: Orufrey
+Spirit: Elswyth
+
+Player: [A játékos Orufrey most idézett meg téged egy hosszú rituáléval. Üdvözöld!]
+Spirit: Olyan sokáig nem szólt hozzám senki...
+
+Ki vagy te, vándor, aki ismeri az ősi szavakat, és miért keltettél fel engem a feledésből?
+Player: A nevem oró fráj, és a holtak nyugamával kapcsolatban szeretnék fontos kérdést áltenni.
+Spirit: Orufrey... igen, ezt a nevet már hallottam valamikor, mintha a szél susogta volna felém.
+
+Kérdezz hát, én hallgatlak, de előbb mondd meg nekem: ki küldött téged, és honnan tudtad, hogy én itt vagyok?
+Player: Nem küldött engem sanki. Magamtól jöttem, és ez nem tartodik rát, hogy honnan százom az információimat.
+Spirit: Érdekes... aki a holtak nyugalmáról kérdez, az rendszerint valakinek a nevében jön, vagy valami súlyos terhet hordoz magával.
+
+Te mit hordozol, Orufrey? Mi az, ami idehozott, a holtak földjére, ahol nem sokan mernek járni?
+Player: Ne várt, hogy meggyonyam a vészkájmát, csak azt szeretném tudni, hogy hogyan szólhatok ezt elvrátál, aki állholt.
+Spirit: A holtak nem mindig hallgatnak azokra, akik hívják őket... de néha hallgatnak.
+
+Mondd meg legalább azt, ki az, akit keresel, mert a neve nélkül én sem tudok segíteni neked, és mert itt Északon sok-sok lélek bolyong, mind a maga fájdalmával terhelve.
+Player: [A játékos szó nélkül eltávozott az oltártól. Mondj egy rövid, méltóságteljes búcsút.]
+Spirit: Menj hát, Orufrey... de érzem, hogy visszatérsz még.
+
+Menj békével.

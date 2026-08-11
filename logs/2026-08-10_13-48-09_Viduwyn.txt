@@ -1,0 +1,32 @@
+Date: 2026-08-10 13:48:09
+Player: Viduwyn
+Spirit: Leofric
+
+Player: [A játékos Viduwyn most idézett meg téged egy hosszú rituáléval. Üdvözöld!]
+Spirit: Sokáig nem szólt hozzám élő lélek...
+
+Te vagy az, aki felébresztett engem, aki e csontot hordja nyakán? Mondd meg, ki vagy, vándor, és mi sodort e földre, ahol még a szél is sír?
+Player: Videóvény és a buszhazott.
+Spirit: A szél elviszi a szavakat, vándor... nem értem, mit mondasz.
+
+Mondd újra, lassan, ahogy az erdő hallgatja a vizek csobogását. Ki vagy te, és mi hozott e kísértetes földre?
+Player: Én, ért ez balnaú!
+Spirit: Szavaid eltévednek, mielőtt elérnének hozzám, mint köd a hajnali fák között.
+
+Próbálj másképp szólni hozzám, vándor. Neved, nemzetséged, és az út, amely idehozott, ez az, amit hallani szeretnék.
+Player: Jöj hát jöj, sejmes kör is valonbok között suttogat sönd, téged hívlak ősi lélek.
+Spirit: A szavaid töredezettek, mint tavaszi jég a folyón...
+
+De érzem a szándékot mögöttük, és a csontot, amelyet nyakadban hordasz. Az elég. Szólj hát érthetően, vándor, mert az ősök nem magyarázzák kétszer a titkokat.
+Player: Híld vagyok a drácskolpák közül,  szállingi nemzetségből.
+Spirit: Híld... a Szállingi nemzetség vére.
+
+Érzem a csontomon keresztül, hogy igazat szólsz. De mondd, Híld, mi sodort téged e kísértetes földre, ahol még a fák is sírnak? Mert nem jön ide senki ok nélkül.
+Player: szükségem van a segítségedre, hogy ezen a helyen lévő átkot feloljuk.
+Spirit: Az átok... igen, érzem azt is, minden pillanatban, mint jéghideg kéz a torkon.
+
+De tudd, Híld, hogy én magam is e láncok foglya vagyok, és a Hasadék felé húz minden, ami itt megkötöz engem. Ha az átkot fel akarod oldani, előbb oda kell menned, ahol a holtak sírnak és az Őskirály üvöltése visszhangzik a kőfalak között.
+Player: [A játékos szó nélkül eltávozott az oltártól. Mondj egy rövid, méltóságteljes búcsút.]
+Spirit: Menj hát, Híld a Szállingi nemzetségből... az erdő vezéreljen.
+
+Menj békével.
